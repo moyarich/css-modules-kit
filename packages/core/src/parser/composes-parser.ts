@@ -1,12 +1,12 @@
-import type { Declaration } from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
+import type { Declaration } from "postcss";
+import postcssValueParser from "postcss-value-parser";
 import type {
   ExternalTokenReference,
   ExternalTokenReferenceEntry,
   LocalTokenReference,
   TokenReference,
-} from '../type.js';
-import { calcDeclValueLoc } from './util.js';
+} from "../type.js";
+import { calcDeclValueLoc } from "./util.js";
 
 const COMPOSES_PROP_RE = /^composes$/iu;
 
@@ -21,10 +21,15 @@ export function parseComposesProp(decl: Declaration): TokenReference[] {
     if (hasFromClause(item)) {
       const specifierNode = item.at(-1)!;
       // Items with `from global` do not produce token references.
-      if (specifierNode.type !== 'string') continue;
+      if (specifierNode.type !== "string") continue;
       const head = item.slice(0, findFromKeywordIndex(item));
-      const externalReference = createExternalReference(decl, head, specifierNode);
-      if (externalReference.entries.length > 0) references.push(externalReference);
+      const externalReference = createExternalReference(
+        decl,
+        head,
+        specifierNode,
+      );
+      if (externalReference.entries.length > 0)
+        references.push(externalReference);
       continue;
     }
     // Items without a `from` clause consist of plain class names.
@@ -43,7 +48,9 @@ function hasFromClause(item: postcssValueParser.Node[]): boolean {
 }
 
 function findFromKeywordIndex(item: postcssValueParser.Node[]): number {
-  return item.findLastIndex((node) => node.type === 'word' && node.value.toLowerCase() === 'from');
+  return item.findLastIndex(
+    (node) => node.type === "word" && node.value.toLowerCase() === "from",
+  );
 }
 
 /**
@@ -53,17 +60,23 @@ function findFromKeywordIndex(item: postcssValueParser.Node[]): number {
 function isValidFromClauseTail(tail: postcssValueParser.Node[]): boolean {
   if (tail.length !== 1) return false;
   const node = tail[0]!;
-  return node.type === 'string' || (node.type === 'word' && node.value.toLowerCase() === 'global');
+  return (
+    node.type === "string" ||
+    (node.type === "word" && node.value.toLowerCase() === "global")
+  );
 }
 
 /** Create a local token reference for each class name in `nodes`. */
-function createLocalReferences(decl: Declaration, nodes: postcssValueParser.Node[]): LocalTokenReference[] {
+function createLocalReferences(
+  decl: Declaration,
+  nodes: postcssValueParser.Node[],
+): LocalTokenReference[] {
   const references: LocalTokenReference[] = [];
   for (const node of nodes) {
     // `global(name)` and any other function are skipped.
-    if (node.type !== 'word') continue;
+    if (node.type !== "word") continue;
     references.push({
-      type: 'local',
+      type: "local",
       name: node.value,
       loc: calcDeclValueLoc(decl, node.sourceIndex, node.value.length),
     });
@@ -79,25 +92,34 @@ function createExternalReference(
 ): ExternalTokenReference {
   const entries: ExternalTokenReferenceEntry[] = [];
   for (const node of nodes) {
-    if (node.type !== 'word') continue;
-    entries.push({ name: node.value, loc: calcDeclValueLoc(decl, node.sourceIndex, node.value.length) });
+    if (node.type !== "word") continue;
+    entries.push({
+      name: node.value,
+      loc: calcDeclValueLoc(decl, node.sourceIndex, node.value.length),
+    });
   }
   return {
-    type: 'external',
+    type: "external",
     entries,
     from: specifierNode.value,
     // The location of the specifier without quotes.
-    fromLoc: calcDeclValueLoc(decl, specifierNode.sourceIndex + 1, specifierNode.value.length),
+    fromLoc: calcDeclValueLoc(
+      decl,
+      specifierNode.sourceIndex + 1,
+      specifierNode.value.length,
+    ),
   };
 }
 
 /** Split the value nodes by top-level commas. Space nodes are dropped. */
-function splitByComma(nodes: postcssValueParser.Node[]): postcssValueParser.Node[][] {
+function splitByComma(
+  nodes: postcssValueParser.Node[],
+): postcssValueParser.Node[][] {
   const items: postcssValueParser.Node[][] = [[]];
   for (const node of nodes) {
-    if (node.type === 'div' && node.value === ',') {
+    if (node.type === "div" && node.value === ",") {
       items.push([]);
-    } else if (node.type !== 'space') {
+    } else if (node.type !== "space") {
       items.at(-1)!.push(node);
     }
   }

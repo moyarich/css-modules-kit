@@ -1,9 +1,9 @@
-import dedent from 'dedent';
-import { expect, test } from 'vite-plus/test';
-import type { GenerateDtsResult } from '../dts-generator.js';
-import { renderDtsResult } from './dts-mapping.js';
+import dedent from "dedent";
+import { expect, test } from "vite-plus/test";
+import type { GenerateDtsResult } from "../dts-generator.js";
+import { renderDtsResult } from "./dts-mapping.js";
 
-test('renderDtsResult', () => {
+test("renderDtsResult", () => {
   const source = dedent`
     .a_1 {}
     .a_2 .a_3 {}
@@ -19,15 +19,31 @@ test('renderDtsResult', () => {
   const result: GenerateDtsResult = {
     text: dts,
     mapping: {
-      sourceOffsets: [source.indexOf('a_1'), source.indexOf('a_2'), source.indexOf('a_3')],
+      sourceOffsets: [
+        source.indexOf("a_1"),
+        source.indexOf("a_2"),
+        source.indexOf("a_3"),
+      ],
       lengths: [3, 3, 3],
-      generatedOffsets: [dts.indexOf('_token_0'), dts.indexOf('_token_1'), dts.indexOf('_token_2')],
+      generatedOffsets: [
+        dts.indexOf("_token_0"),
+        dts.indexOf("_token_1"),
+        dts.indexOf("_token_2"),
+      ],
       generatedLengths: [8, 8, 8],
     },
     linkedCodeMapping: {
-      sourceOffsets: [dts.indexOf('_token_0 as'), dts.indexOf('_token_1 as'), dts.indexOf('_token_2 as')],
+      sourceOffsets: [
+        dts.indexOf("_token_0 as"),
+        dts.indexOf("_token_1 as"),
+        dts.indexOf("_token_2 as"),
+      ],
       lengths: [8, 8, 8],
-      generatedOffsets: [dts.indexOf("'a_1'"), dts.indexOf("'a_2'"), dts.indexOf("'a_3'")],
+      generatedOffsets: [
+        dts.indexOf("'a_1'"),
+        dts.indexOf("'a_2'"),
+        dts.indexOf("'a_3'"),
+      ],
       generatedLengths: [5, 5, 5],
     },
   };

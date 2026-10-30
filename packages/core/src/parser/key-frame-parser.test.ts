@@ -1,10 +1,10 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeAtKeyframes, fakeRoot } from '../test/ast.js';
-import { parseKeyframesAtRule } from './key-frame-parser.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import { fakeAtKeyframes, fakeRoot } from "../test/ast.js";
+import { parseKeyframesAtRule } from "./key-frame-parser.js";
 
-describe('parseKeyframesAtRule', () => {
-  test('valid', () => {
+describe("parseKeyframesAtRule", () => {
+  test("valid", () => {
     const atKeyframes = fakeAtKeyframes(
       fakeRoot(dedent`
         @keyframes basic {}
@@ -120,7 +120,7 @@ describe('parseKeyframesAtRule', () => {
       ]
     `);
   });
-  test('invalid', () => {
+  test("invalid", () => {
     const atKeyframes = fakeAtKeyframes(
       fakeRoot(dedent`
         /* :local() wrappers are disallowed */

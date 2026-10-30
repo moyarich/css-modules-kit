@@ -1,23 +1,23 @@
-import type { CMKConfig } from '../config.js';
-import { createResolver } from '../resolver.js';
-import type { MatchesPattern, Resolver } from '../type.js';
+import type { CMKConfig } from "../config.js";
+import { createResolver } from "../resolver.js";
+import type { MatchesPattern, Resolver } from "../type.js";
 
 export function fakeConfig(args?: Partial<CMKConfig>): CMKConfig {
   return {
-    includes: ['/app/**/*'],
+    includes: ["/app/**/*"],
     excludes: [],
     enabled: true,
-    dtsOutDir: 'generated',
+    dtsOutDir: "generated",
     arbitraryExtensions: false,
     namedExports: false,
     prioritizeNamedImports: false,
     animation: true,
     dashedIdents: false,
     container: false,
-    basePath: '/app',
-    configFileName: '/app/tsconfig.json',
+    basePath: "/app",
+    configFileName: "/app/tsconfig.json",
     compilerOptions: {},
-    wildcardDirectories: [{ fileName: '/app', recursive: true }],
+    wildcardDirectories: [{ fileName: "/app", recursive: true }],
     diagnostics: [],
     ...args,
   };
@@ -29,5 +29,5 @@ export function fakeResolver(args?: { config?: CMKConfig }): Resolver {
 }
 
 export function fakeMatchesPattern(): MatchesPattern {
-  return (fileName) => fileName.endsWith('.module.css');
+  return (fileName) => fileName.endsWith(".module.css");
 }

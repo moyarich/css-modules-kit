@@ -15,12 +15,17 @@ export function buildTSConfigJSON(args?: TSConfig): string {
 
 interface BuildStylesImportOptions {
   namedExports: boolean;
-  quote?: 'single' | 'double';
+  quote?: "single" | "double";
   name?: string;
 }
 
-export function buildStylesImport(specifier: string, options: BuildStylesImportOptions): string {
-  const { namedExports, quote = 'single', name = 'styles' } = options;
-  const q = quote === 'single' ? "'" : '"';
-  return namedExports ? `import * as ${name} from ${q}${specifier}${q};` : `import ${name} from ${q}${specifier}${q};`;
+export function buildStylesImport(
+  specifier: string,
+  options: BuildStylesImportOptions,
+): string {
+  const { namedExports, quote = "single", name = "styles" } = options;
+  const q = quote === "single" ? "'" : '"';
+  return namedExports
+    ? `import * as ${name} from ${q}${specifier}${q};`
+    : `import ${name} from ${q}${specifier}${q};`;
 }

@@ -1,19 +1,27 @@
-import type { CMKConfig, CSSModule, MatchesPattern } from '@css-modules-kit/core';
-import { generateDts, parseCSSModule } from '@css-modules-kit/core';
-import type { LanguagePlugin, SourceScript, VirtualCode } from '@volar/language-core';
-import type {} from '@volar/typescript';
-import ts from 'typescript';
+import type {
+  CMKConfig,
+  CSSModule,
+  MatchesPattern,
+} from "@css-modules-kit/core";
+import { generateDts, parseCSSModule } from "@css-modules-kit/core";
+import type {
+  LanguagePlugin,
+  SourceScript,
+  VirtualCode,
+} from "@volar/language-core";
+import type {} from "@volar/typescript";
+import ts from "typescript";
 
-export const LANGUAGE_ID = 'css';
+export const LANGUAGE_ID = "css";
 
-export const CMK_DATA_KEY = Symbol('css-modules-kit-data');
+export const CMK_DATA_KEY = Symbol("css-modules-kit-data");
 
 interface CSSModuleVirtualCode extends VirtualCode {
   [CMK_DATA_KEY]: CSSModule;
 }
 
 export interface CSSModuleScript extends SourceScript<string> {
-  generated: SourceScript<string>['generated'] & {
+  generated: SourceScript<string>["generated"] & {
     root: CSSModuleVirtualCode;
   };
 }
@@ -24,17 +32,21 @@ export function createCSSLanguagePlugin(
 ): LanguagePlugin<string, VirtualCode> {
   return {
     getLanguageId(scriptId) {
-      if (!scriptId.endsWith('.css')) return undefined;
+      if (!scriptId.endsWith(".css")) return undefined;
       return LANGUAGE_ID;
     },
-    createVirtualCode(scriptId, languageId, snapshot): VirtualCode | CSSModuleVirtualCode | undefined {
+    createVirtualCode(
+      scriptId,
+      languageId,
+      snapshot,
+    ): VirtualCode | CSSModuleVirtualCode | undefined {
       if (languageId !== LANGUAGE_ID) return undefined;
       if (!matchesPattern(scriptId)) {
         // `scriptId` is CSS, but not a CSS module.
         // If an empty VirtualCode is not returned for a CSS file, tsserver will treat it as TypeScript code.
         // ref: https://github.com/mizdra/css-modules-kit/issues/170
         return {
-          id: 'main',
+          id: "main",
           languageId,
           snapshot,
           mappings: [],
@@ -60,8 +72,8 @@ export function createCSSLanguagePlugin(
         forTsPlugin: true,
       });
       return {
-        id: 'main',
-        languageId: 'typescript',
+        id: "main",
+        languageId: "typescript",
         snapshot: {
           getText: (start, end) => text.slice(start, end),
           getLength: () => text.length,
@@ -79,7 +91,7 @@ export function createCSSLanguagePlugin(
     typescript: {
       extraFileExtensions: [
         {
-          extension: 'css',
+          extension: "css",
           isMixedContent: true,
           scriptKind: ts.ScriptKind.TS,
         },
@@ -95,8 +107,13 @@ export function createCSSLanguagePlugin(
   };
 }
 
-export function isCSSModuleScript(script: SourceScript<string> | undefined): script is CSSModuleScript {
+export function isCSSModuleScript(
+  script: SourceScript<string> | undefined,
+): script is CSSModuleScript {
   return (
-    !!script && script.languageId === LANGUAGE_ID && !!script.generated?.root && CMK_DATA_KEY in script.generated.root
+    !!script &&
+    script.languageId === LANGUAGE_ID &&
+    !!script.generated?.root &&
+    CMK_DATA_KEY in script.generated.root
   );
 }

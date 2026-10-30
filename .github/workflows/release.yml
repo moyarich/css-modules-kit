@@ -1,49 +1,99 @@
-name: Release
+name: Release package
+
+run-name: >-
+  Release · ${{ inputs.package }} · ${{ inputs.version-mode }}${{ inputs.version-mode
+  == 'bump' && format(':{0}', inputs.version-bump) || inputs.version-mode == 'exact'
+  && format(':{0}', inputs.exact-version) || '' }} · ${{ inputs.draft && 'draft' ||
+  'published' }} · dry-run=${{ inputs.dry-run }}
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      workspace-tools-source:
+        description: Workspace Tools CLI source for package discovery
+        type: choice
+        required: true
+        default: auto
+        options:
+          - auto
+          - checkout:current
+          - checkout:upstream;branch:main
+          - registry:npm:latest
+      package:
+        description: Select a publishable workspace package
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - "packages/example"
+      version-mode:
+        description: Resolve each package version
+        type: choice
+        required: true
+        default: auto
+        options: [auto, bump, package-json, exact]
+      initial-version:
+        description: Initial release version for auto mode
+        type: string
+        required: true
+        default: "0.1.0"
+      version-bump:
+        description: SemVer increment for bump mode
+        type: choice
+        required: true
+        default: patch
+        options: [patch, minor, major, prepatch, preminor, premajor, prerelease]
+      exact-version:
+        description: Version for exact mode (all selected packages)
+        type: string
+        required: false
+        default: ""
+      commit-version-changes:
+        description: Commit prepared versions and lockfile to the selected branch before release
+        type: boolean
+        required: true
+        default: false
+      update-major-tag:
+        description: Update package-scoped major compatibility alias
+        type: boolean
+        required: true
+        default: true
+      draft:
+        description: |
+          Prepare draft GitHub Releases
+          (disable only to explicitly finalize)
+        type: boolean
+        required: true
+        default: true
+      dry-run:
+        description: Validate without creating a GitHub Release, tag, or package
+        required: true
+        default: true
+        type: boolean
 
-permissions:
-  id-token: write # Required for npm trusted publishing with OIDC
-  contents: write # Required for changesets/action
-  pull-requests: write # Required for changesets/action
+permissions: {}
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: release-package-${{ inputs.package }}
+  cancel-in-progress: false
 
 jobs:
   release:
-    name: Release
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: voidzero-dev/setup-vp@56918a6d0c629c55ae8b88826a7d47fda85769ee # v1.9.0
-        with:
-          node-version: 26
-          cache: true
-      - run: vp run build
-      - name: set release variables
-        run: echo "date=$(date -u +'%Y-%m-%dT%H:%MZ')" >> $GITHUB_ENV
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: dotansimha/changesets-action@069996e9be15531bd598272996fa23853d61590e # v1.5.2
-        with:
-          version: vp run version
-          publish: vp exec changeset publish
-          createGithubReleases: aggregate
-          githubReleaseName: Release ${{ env.date }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-      - run: vp exec vsce publish --no-git-tag-version --skip-duplicate
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        working-directory: packages/vscode
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      - run: vp exec ovsx publish --skip-duplicate
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        working-directory: packages/vscode
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    name: Release selected packages
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_workspace-package-release.yml@main
+    with:
+      workspace-tools-source: ${{ inputs.workspace-tools-source }}
+      package: ${{ inputs.package }}
+      version-mode: ${{ inputs.version-mode }}
+      initial-version: ${{ inputs.initial-version }}
+      version-bump: ${{ inputs.version-bump }}
+      exact-version: ${{ inputs.exact-version }}
+      commit-version-changes: ${{ inputs.commit-version-changes }}
+      update-major-tag: ${{ inputs.update-major-tag }}
+      draft: ${{ inputs.draft }}
+      dry-run: ${{ inputs.dry-run }}

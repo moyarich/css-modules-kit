@@ -1,3 +1,5 @@
-.a_1 { color: red; }
+.a_1 {
+  color: red;
+}
 
-@import '@/src/dir-2/b.module.css';
+@import "@/src/dir-2/b.module.css";

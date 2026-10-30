@@ -1,6 +1,10 @@
-import type { Rule } from 'postcss';
-import selectorParser from 'postcss-selector-parser';
-import type { DiagnosticPosition, DiagnosticWithDetachedLocation, Location } from '../type.js';
+import type { Rule } from "postcss";
+import selectorParser from "postcss-selector-parser";
+import type {
+  DiagnosticPosition,
+  DiagnosticWithDetachedLocation,
+  Location,
+} from "../type.js";
 
 function calcDiagnosticsLocationForSelectorParserNode(
   rule: Rule,
@@ -35,17 +39,23 @@ function flatCollectResults(results: CollectResult[]): CollectResult {
  * @see https://github.com/css-modules/postcss-modules-local-by-default/blob/38119276608ef14821797cfc0242b3c7dead69af/test/index.test.js
  * @example `.local1 :global(.global1) .local2 :local(.local3)` => `[".local1", ".local2", ".local3"]`
  */
-function collectLocalClassNames(rule: Rule, root: selectorParser.Root): CollectResult {
+function collectLocalClassNames(
+  rule: Rule,
+  root: selectorParser.Root,
+): CollectResult {
   return visitNode(root, undefined);
 
-  function visitNode(node: selectorParser.Node, wrappedBy: ':local(...)' | ':global(...)' | undefined): CollectResult {
+  function visitNode(
+    node: selectorParser.Node,
+    wrappedBy: ":local(...)" | ":global(...)" | undefined,
+  ): CollectResult {
     if (selectorParser.isClassName(node)) {
       switch (wrappedBy) {
         // If the class name is wrapped by `:local(...)` or `:global(...)`,
         // the scope is determined by the wrapper.
-        case ':local(...)':
+        case ":local(...)":
           return { classNames: [node], diagnostics: [] };
-        case ':global(...)':
+        case ":global(...)":
           return { classNames: [], diagnostics: [] };
         // If the class name is not wrapped by `:local(...)` or `:global(...)`,
         // the scope is determined by the mode.
@@ -53,14 +63,17 @@ function collectLocalClassNames(rule: Rule, root: selectorParser.Root): CollectR
           // Mode is customizable in css-loader, but we don't support it for simplicity. We fix the mode to 'local'.
           return { classNames: [node], diagnostics: [] };
       }
-    } else if (selectorParser.isPseudo(node) && (node.value === ':local' || node.value === ':global')) {
+    } else if (
+      selectorParser.isPseudo(node) &&
+      (node.value === ":local" || node.value === ":global")
+    ) {
       if (node.nodes.length === 0) {
         // `node` is `:local` or `:global` (without any arguments)
         // We don't support `:local` and `:global` (without any arguments) because they are complex.
         const diagnostic: DiagnosticWithDetachedLocation = {
           ...calcDiagnosticsLocationForSelectorParserNode(rule, node),
           text: `css-modules-kit does not support \`${node.value}\`. Use \`${node.value}(...)\` instead.`,
-          category: 'error',
+          category: "error",
         };
         return { classNames: [], diagnostics: [diagnostic] };
       } else {
@@ -69,16 +82,23 @@ function collectLocalClassNames(rule: Rule, root: selectorParser.Root): CollectR
           const diagnostic: DiagnosticWithDetachedLocation = {
             ...calcDiagnosticsLocationForSelectorParserNode(rule, node),
             text: `A \`${node.value}(...)\` is not allowed inside of \`${wrappedBy}\`.`,
-            category: 'error',
+            category: "error",
           };
           return { classNames: [], diagnostics: [diagnostic] };
         }
         return flatCollectResults(
-          node.nodes.map((child) => visitNode(child, node.value === ':local' ? ':local(...)' : ':global(...)')),
+          node.nodes.map((child) =>
+            visitNode(
+              child,
+              node.value === ":local" ? ":local(...)" : ":global(...)",
+            ),
+          ),
         );
       }
     } else if (selectorParser.isContainer(node)) {
-      return flatCollectResults(node.nodes.map((child) => visitNode(child, wrappedBy)));
+      return flatCollectResults(
+        node.nodes.map((child) => visitNode(child, wrappedBy)),
+      );
     }
     return { classNames: [], diagnostics: [] };
   }
@@ -128,7 +148,7 @@ export function parseRule(rule: Rule): ParseRuleResult {
      * The return value of `className.toString()` may contain leading dots and spaces like `" .1backslash"`.
      * Therefore, we remove the leading spaces and dot with a regular expression.
      */
-    const rawClassName = className.toString().replace(/^\s*\./u, '');
+    const rawClassName = className.toString().replace(/^\s*\./u, "");
     const end = {
       // The end line is always the same as the start line, as a class selector cannot break in the middle.
       line: start.line,
@@ -138,7 +158,10 @@ export function parseRule(rule: Rule): ParseRuleResult {
     return {
       name: rawClassName,
       loc: { start, end },
-      declarationLoc: { start: rule.source!.start!, end: rule.positionBy({ index: rule.toString().length }) },
+      declarationLoc: {
+        start: rule.source!.start!,
+        end: rule.positionBy({ index: rule.toString().length }),
+      },
     };
   });
   return { classSelectors, diagnostics: result.diagnostics };

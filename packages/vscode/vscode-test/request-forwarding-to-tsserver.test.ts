@@ -11,106 +11,131 @@
  *
  */
 
-import * as assert from 'node:assert/strict';
-import { before, describe, it } from 'mocha';
-import * as vscode from 'vscode';
-import { createFixture, toObject } from './util.js';
+import * as assert from "node:assert/strict";
+import { before, describe, it } from "mocha";
+import * as vscode from "vscode";
+import { createFixture, toObject } from "./util.js";
 
 const workspaceRoot = vscode.workspace.workspaceFolders![0]!.uri;
-const aModuleCSS1Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-1/a.module.css');
-const bModuleCSS1Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-1/b.module.css');
-const cModuleCSS1Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-1/c.module.css');
-const aTSX1Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-1/a.tsx');
-const aModuleCSS2Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-2/a.module.css');
-const bModuleCSS2Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-2/b.module.css');
-const aTSX2Path = vscode.Uri.joinPath(workspaceRoot, 'src/dir-2/a.tsx');
+const aModuleCSS1Path = vscode.Uri.joinPath(
+  workspaceRoot,
+  "src/dir-1/a.module.css",
+);
+const bModuleCSS1Path = vscode.Uri.joinPath(
+  workspaceRoot,
+  "src/dir-1/b.module.css",
+);
+const cModuleCSS1Path = vscode.Uri.joinPath(
+  workspaceRoot,
+  "src/dir-1/c.module.css",
+);
+const aTSX1Path = vscode.Uri.joinPath(workspaceRoot, "src/dir-1/a.tsx");
+const aModuleCSS2Path = vscode.Uri.joinPath(
+  workspaceRoot,
+  "src/dir-2/a.module.css",
+);
+const bModuleCSS2Path = vscode.Uri.joinPath(
+  workspaceRoot,
+  "src/dir-2/b.module.css",
+);
+const aTSX2Path = vscode.Uri.joinPath(workspaceRoot, "src/dir-2/a.tsx");
 
 type RangeWithPlaceholder = { range: vscode.Range; placeholder: string };
 
 before(async () => {
-  const cmkExtension = vscode.extensions.getExtension('mizdra.css-modules-kit-vscode')!;
+  const cmkExtension = vscode.extensions.getExtension(
+    "mizdra.css-modules-kit-vscode",
+  )!;
   await cmkExtension.activate();
 });
 
-describe('Rename Symbol in a CSS module', () => {
-  it('renames a class across the CSS module and the importing TS file', async () => {
-    const aModuleCSSDocument = await vscode.workspace.openTextDocument(aModuleCSS1Path);
+describe("Rename Symbol in a CSS module", () => {
+  it("renames a class across the CSS module and the importing TS file", async () => {
+    const aModuleCSSDocument =
+      await vscode.workspace.openTextDocument(aModuleCSS1Path);
     const aTSXDocument = await vscode.workspace.openTextDocument(aTSX1Path);
     const position = new vscode.Position(0, 1); // `a_1`
 
-    const rangeAndPlaceholder = await vscode.commands.executeCommand<RangeWithPlaceholder>(
-      'vscode.prepareRename',
-      aModuleCSS1Path,
-      position,
-    );
+    const rangeAndPlaceholder =
+      await vscode.commands.executeCommand<RangeWithPlaceholder>(
+        "vscode.prepareRename",
+        aModuleCSS1Path,
+        position,
+      );
     assert.deepEqual(
       toObject(rangeAndPlaceholder.range),
       toObject(new vscode.Range(0, 1, 0, 4)), // `a_1`
     );
 
-    const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-      'vscode.executeDocumentRenameProvider',
-      aModuleCSS1Path,
-      position,
-      'a_1_renamed',
-    );
+    const workspaceEdit =
+      await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        "vscode.executeDocumentRenameProvider",
+        aModuleCSS1Path,
+        position,
+        "a_1_renamed",
+      );
     const success = await vscode.workspace.applyEdit(workspaceEdit);
 
     assert.ok(success);
-    assert.ok(aModuleCSSDocument.getText().includes('.a_1_renamed'));
-    assert.ok(aTSXDocument.getText().includes('a_1_renamed'));
+    assert.ok(aModuleCSSDocument.getText().includes(".a_1_renamed"));
+    assert.ok(aTSXDocument.getText().includes("a_1_renamed"));
   });
-  it('renames a class regardless of which tsconfig project the CSS module belongs to', async () => {
-    const aModuleCSSDocument = await vscode.workspace.openTextDocument(aModuleCSS2Path);
+  it("renames a class regardless of which tsconfig project the CSS module belongs to", async () => {
+    const aModuleCSSDocument =
+      await vscode.workspace.openTextDocument(aModuleCSS2Path);
     const aTSXDocument = await vscode.workspace.openTextDocument(aTSX2Path);
     const position = new vscode.Position(0, 1); // `a_1`
 
-    const rangeAndPlaceholder = await vscode.commands.executeCommand<RangeWithPlaceholder>(
-      'vscode.prepareRename',
-      aModuleCSS2Path,
-      position,
-    );
+    const rangeAndPlaceholder =
+      await vscode.commands.executeCommand<RangeWithPlaceholder>(
+        "vscode.prepareRename",
+        aModuleCSS2Path,
+        position,
+      );
     assert.deepEqual(
       toObject(rangeAndPlaceholder.range),
       toObject(new vscode.Range(0, 1, 0, 4)), // `a_1`
     );
 
-    const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-      'vscode.executeDocumentRenameProvider',
-      aModuleCSS2Path,
-      position,
-      'a_1_renamed',
-    );
+    const workspaceEdit =
+      await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        "vscode.executeDocumentRenameProvider",
+        aModuleCSS2Path,
+        position,
+        "a_1_renamed",
+      );
     const success = await vscode.workspace.applyEdit(workspaceEdit);
 
     assert.ok(success);
-    assert.ok(aModuleCSSDocument.getText().includes('.a_1_renamed'));
-    assert.ok(aTSXDocument.getText().includes('a_1_renamed'));
+    assert.ok(aModuleCSSDocument.getText().includes(".a_1_renamed"));
+    assert.ok(aTSXDocument.getText().includes("a_1_renamed"));
   });
-  it('falls back to the standard CSS Language Server for non-class symbols (e.g. CSS properties)', async () => {
-    const aModuleCSSDocument = await vscode.workspace.openTextDocument(aModuleCSS1Path);
+  it("falls back to the standard CSS Language Server for non-class symbols (e.g. CSS properties)", async () => {
+    const aModuleCSSDocument =
+      await vscode.workspace.openTextDocument(aModuleCSS1Path);
     const position = new vscode.Position(0, 7); // `color`
 
     // CSS Language Server does not support `prepareRename`, so we skip testing it.
 
-    const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-      'vscode.executeDocumentRenameProvider',
-      aModuleCSS1Path,
-      position,
-      'color-renamed',
-    );
+    const workspaceEdit =
+      await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        "vscode.executeDocumentRenameProvider",
+        aModuleCSS1Path,
+        position,
+        "color-renamed",
+      );
     const success = await vscode.workspace.applyEdit(workspaceEdit);
 
     assert.ok(success);
-    assert.ok(aModuleCSSDocument.getText().includes('color-renamed'));
+    assert.ok(aModuleCSSDocument.getText().includes("color-renamed"));
   });
 });
 
-describe('Document Link for an import specifier in a CSS module', () => {
-  it('resolves a path-aliased import specifier to the target CSS module', async () => {
+describe("Document Link for an import specifier in a CSS module", () => {
+  it("resolves a path-aliased import specifier to the target CSS module", async () => {
     await vscode.workspace.openTextDocument(aModuleCSS1Path);
     const links = await vscode.commands.executeCommand<vscode.DocumentLink[]>(
-      'vscode.executeLinkProvider',
+      "vscode.executeLinkProvider",
       aModuleCSS1Path,
     );
 
@@ -121,10 +146,10 @@ describe('Document Link for an import specifier in a CSS module', () => {
       toObject(new vscode.Range(2, 9, 2, 33)), // `@/src/dir-1/b.module.css`
     );
   });
-  it('resolves a path-aliased import specifier regardless of which tsconfig project the importer belongs to', async () => {
+  it("resolves a path-aliased import specifier regardless of which tsconfig project the importer belongs to", async () => {
     await vscode.workspace.openTextDocument(aModuleCSS2Path);
     const links = await vscode.commands.executeCommand<vscode.DocumentLink[]>(
-      'vscode.executeLinkProvider',
+      "vscode.executeLinkProvider",
       aModuleCSS2Path,
     );
 
@@ -135,15 +160,18 @@ describe('Document Link for an import specifier in a CSS module', () => {
       toObject(new vscode.Range(2, 9, 2, 33)), // `@/src/dir-2/b.module.css`
     );
   });
-  it('coexists with URL links provided by the standard CSS Language Server', async () => {
+  it("coexists with URL links provided by the standard CSS Language Server", async () => {
     await vscode.workspace.openTextDocument(cModuleCSS1Path);
     const links = await vscode.commands.executeCommand<vscode.DocumentLink[]>(
-      'vscode.executeLinkProvider',
+      "vscode.executeLinkProvider",
       cModuleCSS1Path,
     );
 
     assert.equal(links.length, 2);
-    assert.ok(links[0]!.target?.toString() === vscode.Uri.parse('https://test.example/image.png').toString());
+    assert.ok(
+      links[0]!.target?.toString() ===
+        vscode.Uri.parse("https://test.example/image.png").toString(),
+    );
     assert.deepEqual(
       toObject(links[0]!.range),
       toObject(new vscode.Range(0, 23, 0, 55)), // `'https://test.example/image.png'`
@@ -156,26 +184,28 @@ describe('Document Link for an import specifier in a CSS module', () => {
   });
 });
 
-describe('Rename Symbol on an import specifier in a CSS module', () => {
-  it('renames the imported file and updates the import path while preserving the relative prefix', async () => {
+describe("Rename Symbol on an import specifier in a CSS module", () => {
+  it("renames the imported file and updates the import path while preserving the relative prefix", async () => {
     const iff = await createFixture({
-      'tsconfig.json': JSON.stringify({ cmkOptions: { enabled: true } }),
-      'd.module.css': `@import './e.module.css';\n`,
-      'e.module.css': `.e_1 { color: red; }\n`,
+      "tsconfig.json": JSON.stringify({ cmkOptions: { enabled: true } }),
+      "d.module.css": `@import './e.module.css';\n`,
+      "e.module.css": `.e_1 { color: red; }\n`,
     });
-    const dModuleCSSPath = vscode.Uri.file(iff.paths['d.module.css']);
-    const renamedEModuleCSSPath = vscode.Uri.file(iff.join('ee.module.css'));
+    const dModuleCSSPath = vscode.Uri.file(iff.paths["d.module.css"]);
+    const renamedEModuleCSSPath = vscode.Uri.file(iff.join("ee.module.css"));
 
-    const dModuleCSSDocument = await vscode.workspace.openTextDocument(dModuleCSSPath);
+    const dModuleCSSDocument =
+      await vscode.workspace.openTextDocument(dModuleCSSPath);
     // Cursor on `e` in `@import './e.module.css';`
     const position = new vscode.Position(0, 11);
 
-    const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-      'vscode.executeDocumentRenameProvider',
-      dModuleCSSPath,
-      position,
-      'ee.module.css',
-    );
+    const workspaceEdit =
+      await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        "vscode.executeDocumentRenameProvider",
+        dModuleCSSPath,
+        position,
+        "ee.module.css",
+      );
     const success = await vscode.workspace.applyEdit(workspaceEdit);
     assert.ok(success);
 

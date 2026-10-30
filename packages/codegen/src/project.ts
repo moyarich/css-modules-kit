@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import type { CSSModule, Diagnostic } from '@css-modules-kit/core';
+import { readFileSync } from "node:fs";
+import type { CSSModule, Diagnostic } from "@css-modules-kit/core";
 import {
   checkCSSModule,
   type CMKConfig,
@@ -10,10 +10,10 @@ import {
   getFileNamesByPattern,
   parseCSSModule,
   readConfigFile,
-} from '@css-modules-kit/core';
-import ts from 'typescript';
-import { writeDtsFile } from './dts-writer.js';
-import { ReadCSSModuleFileError } from './error.js';
+} from "@css-modules-kit/core";
+import ts from "typescript";
+import { writeDtsFile } from "./dts-writer.js";
+import { ReadCSSModuleFileError } from "./error.js";
 
 interface ProjectArgs {
   project: string;
@@ -68,7 +68,10 @@ export function createProject(args: ProjectArgs): Project {
     getCanonicalFileName,
     config.compilerOptions,
   );
-  const resolver = createResolver(config.compilerOptions, moduleResolutionCache);
+  const resolver = createResolver(
+    config.compilerOptions,
+    moduleResolutionCache,
+  );
   const matchesPattern = createMatchesPattern(config);
 
   const cssModuleMap = new Map<string, CSSModule>();
@@ -76,7 +79,11 @@ export function createProject(args: ProjectArgs): Project {
   // Tracks whether .d.ts has been emitted after the last change
   const emittedSet = new Set<string>();
   const getCSSModule = (path: string) => cssModuleMap.get(path);
-  const exportBuilder = createExportBuilder({ getCSSModule, matchesPattern, resolver });
+  const exportBuilder = createExportBuilder({
+    getCSSModule,
+    matchesPattern,
+    resolver,
+  });
 
   for (const fileName of getFileNamesByPattern(config)) {
     // NOTE: Files may be deleted between executing `getFileNamesByPattern` and `tryParseCSSModule`.
@@ -145,9 +152,9 @@ export function createProject(args: ProjectArgs): Project {
       //   - Using an asynchronous API makes `addFile` asynchronous too.
       //   - If `deleteFile` runs while `addFile` is executing, a race condition occurs.
       //   - Avoiding this requires something like a mutex. However, implementing that is cumbersome.
-      text = readFileSync(fileName, 'utf-8');
+      text = readFileSync(fileName, "utf-8");
     } catch (error) {
-      if (isNodeJSSystemError(error) && error.code === 'ENOENT') {
+      if (isNodeJSSystemError(error) && error.code === "ENOENT") {
         return undefined;
       }
       throw new ReadCSSModuleFileError(fileName, error);
@@ -163,9 +170,13 @@ export function createProject(args: ProjectArgs): Project {
   }
 
   function getDiagnostics(): Diagnostic[] {
-    const diagnostics: Diagnostic[] = [...getProjectDiagnostics(), ...getSyntacticDiagnostics()];
+    const diagnostics: Diagnostic[] = [
+      ...getProjectDiagnostics(),
+      ...getSyntacticDiagnostics(),
+    ];
     // If there are project or syntactic errors, skip semantic diagnostics
-    if (diagnostics.some((diagnostic) => diagnostic.category === 'error')) return diagnostics;
+    if (diagnostics.some((diagnostic) => diagnostic.category === "error"))
+      return diagnostics;
     diagnostics.push(...getSemanticDiagnostics());
     return diagnostics;
   }
@@ -175,7 +186,7 @@ export function createProject(args: ProjectArgs): Project {
     diagnostics.push(...config.diagnostics);
     if (cssModuleMap.size === 0) {
       diagnostics.push({
-        category: 'error',
+        category: "error",
         text: `The file specified in tsconfig.json not found.`,
       });
     }
@@ -183,7 +194,9 @@ export function createProject(args: ProjectArgs): Project {
   }
 
   function getSyntacticDiagnostics() {
-    return Array.from(cssModuleMap.values()).flatMap(({ diagnostics }) => diagnostics);
+    return Array.from(cssModuleMap.values()).flatMap(
+      ({ diagnostics }) => diagnostics,
+    );
   }
 
   function getSemanticDiagnostics() {
@@ -237,5 +250,10 @@ export function createProject(args: ProjectArgs): Project {
 }
 
 function isNodeJSSystemError(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string';
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string"
+  );
 }

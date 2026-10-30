@@ -1,15 +1,15 @@
-import type { AtRule, Declaration, Root, Rule } from 'postcss';
-import { parse } from 'postcss';
-import type { ClassName } from 'postcss-selector-parser';
-import selectorParser from 'postcss-selector-parser';
+import type { AtRule, Declaration, Root, Rule } from "postcss";
+import { parse } from "postcss";
+import type { ClassName } from "postcss-selector-parser";
+import selectorParser from "postcss-selector-parser";
 
 export function fakeRoot(text: string, from?: string): Root {
-  return parse(text, { from: from || '/test/test.css' });
+  return parse(text, { from: from || "/test/test.css" });
 }
 
 export function fakeAtImports(root: Root): AtRule[] {
   const results: AtRule[] = [];
-  root.walkAtRules('import', (atImport) => {
+  root.walkAtRules("import", (atImport) => {
     results.push(atImport);
   });
   return results;
@@ -17,7 +17,7 @@ export function fakeAtImports(root: Root): AtRule[] {
 
 export function fakeAtValues(root: Root): AtRule[] {
   const results: AtRule[] = [];
-  root.walkAtRules('value', (atValue) => {
+  root.walkAtRules("value", (atValue) => {
     results.push(atValue);
   });
   return results;
@@ -31,12 +31,14 @@ export function fakeRules(root: Root): Rule[] {
   return results;
 }
 
-export function fakeClassSelectors(root: Root): { rule: Rule; classSelector: ClassName }[] {
+export function fakeClassSelectors(
+  root: Root,
+): { rule: Rule; classSelector: ClassName }[] {
   const results: { rule: Rule; classSelector: ClassName }[] = [];
   root.walkRules((rule) => {
     selectorParser((selectors) => {
       selectors.walk((selector) => {
-        if (selector.type === 'class') {
+        if (selector.type === "class") {
           results.push({ rule, classSelector: selector });
         }
       });
@@ -47,7 +49,7 @@ export function fakeClassSelectors(root: Root): { rule: Rule; classSelector: Cla
 
 export function fakeAtKeyframes(root: Root): AtRule[] {
   const results: AtRule[] = [];
-  root.walkAtRules('keyframes', (atKeyframes) => {
+  root.walkAtRules("keyframes", (atKeyframes) => {
     results.push(atKeyframes);
   });
   return results;
@@ -56,15 +58,18 @@ export function fakeAtKeyframes(root: Root): AtRule[] {
 export function fakeDeclaration(css: string): Declaration {
   const root = fakeRoot(css);
   const rule = root.first;
-  if (rule === undefined || rule.type !== 'rule') throw new Error('expected a rule');
+  if (rule === undefined || rule.type !== "rule")
+    throw new Error("expected a rule");
   const decl = rule.first;
-  if (decl === undefined || decl.type !== 'decl') throw new Error('expected a declaration');
+  if (decl === undefined || decl.type !== "decl")
+    throw new Error("expected a declaration");
   return decl;
 }
 
 export function fakeAtRule(css: string): AtRule {
   const root = fakeRoot(css);
   const atRule = root.first;
-  if (atRule === undefined || atRule.type !== 'atrule') throw new Error('expected an at-rule');
+  if (atRule === undefined || atRule.type !== "atrule")
+    throw new Error("expected an at-rule");
   return atRule;
 }

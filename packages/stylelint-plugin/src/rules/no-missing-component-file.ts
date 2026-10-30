@@ -1,18 +1,18 @@
-import { findComponentFile, isCSSModuleFile } from '@css-modules-kit/core';
-import type { Rule, RuleMeta } from 'stylelint';
-import stylelint from 'stylelint';
-import { readFile } from '../util.js';
+import { findComponentFile, isCSSModuleFile } from "@css-modules-kit/core";
+import type { Rule, RuleMeta } from "stylelint";
+import stylelint from "stylelint";
+import { readFile } from "../util.js";
 
 const { createPlugin, utils } = stylelint;
 
-const ruleName = 'css-modules-kit/no-missing-component-file';
+const ruleName = "css-modules-kit/no-missing-component-file";
 
 const messages = utils.ruleMessages(ruleName, {
   disallow: () => `The corresponding component file is not found.`,
 });
 
 const meta: RuleMeta = {
-  url: 'https://github.com/mizdra/css-modules-kit/blob/main/packages/eslint-plugin/docs/rules/no-missing-component-file.md',
+  url: "https://github.com/mizdra/css-modules-kit/blob/main/packages/eslint-plugin/docs/rules/no-missing-component-file.md",
 };
 
 const ruleFunction: Rule = (_primaryOptions, _secondaryOptions, _context) => {

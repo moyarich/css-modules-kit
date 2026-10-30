@@ -8,6 +8,6 @@ export class SystemError extends Error {
 
 export class TsConfigFileNotFoundError extends SystemError {
   constructor() {
-    super('TS_CONFIG_NOT_FOUND', 'No tsconfig.json found.');
+    super("TS_CONFIG_NOT_FOUND", "No tsconfig.json found.");
   }
 }

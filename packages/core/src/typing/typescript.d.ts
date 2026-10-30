@@ -1,6 +1,6 @@
 export {};
 
-declare module 'typescript' {
+declare module "typescript" {
   interface FileSystemEntries {
     readonly files: readonly string[];
     readonly directories: readonly string[];

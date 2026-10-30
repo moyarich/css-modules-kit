@@ -1,19 +1,26 @@
-import { basename, findComponentFileSync, findUsedTokenNames, isCSSModuleFile, parseRule } from '@css-modules-kit/core';
-import type { Rule } from 'eslint';
-import safeParser from 'postcss-safe-parser';
-import { readFile } from '../util.js';
+import {
+  basename,
+  findComponentFileSync,
+  findUsedTokenNames,
+  isCSSModuleFile,
+  parseRule,
+} from "@css-modules-kit/core";
+import type { Rule } from "eslint";
+import safeParser from "postcss-safe-parser";
+import { readFile } from "../util.js";
 
 export const noUnusedClassNames: Rule.RuleModule = {
   meta: {
-    type: 'problem',
-    language: 'css/css',
+    type: "problem",
+    language: "css/css",
     messages: {
-      disallow: '"{{className}}" is defined but never used in "{{componentFileName}}"',
+      disallow:
+        '"{{className}}" is defined but never used in "{{componentFileName}}"',
     },
     docs: {
-      description: 'Disallow unused class names in CSS module files',
+      description: "Disallow unused class names in CSS module files",
       recommended: true,
-      url: 'https://github.com/mizdra/css-modules-kit/blob/main/packages/eslint-plugin/docs/rules/no-unused-class-names.md',
+      url: "https://github.com/mizdra/css-modules-kit/blob/main/packages/eslint-plugin/docs/rules/no-unused-class-names.md",
     },
   },
   create(context) {
@@ -46,7 +53,7 @@ export const noUnusedClassNames: Rule.RuleModule = {
                 column: classSelector.loc.end.column,
               },
             },
-            messageId: 'disallow',
+            messageId: "disallow",
             data: {
               className: classSelector.name,
               componentFileName: basename(componentFile.fileName),
