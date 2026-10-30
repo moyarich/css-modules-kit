@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join, parse, relative, resolve } from '@css-modules-kit/core';
-import { WriteDtsFileError } from './error.js';
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join, parse, relative, resolve } from "@css-modules-kit/core";
+import { WriteDtsFileError } from "./error.js";
 
 /**
  * Get .d.ts file path.
@@ -8,7 +8,10 @@ import { WriteDtsFileError } from './error.js';
  * @param options Output directory options
  * @returns The path to the .d.ts file. It is absolute.
  */
-export function getDtsFilePath(cssModuleFileName: string, options: WriteDtsFileOption): string {
+export function getDtsFilePath(
+  cssModuleFileName: string,
+  options: WriteDtsFileOption,
+): string {
   const relativePath = relative(options.basePath, cssModuleFileName);
   const outputFilePath = resolve(options.outDir, relativePath);
 

@@ -1,6 +1,6 @@
-import type { AtRule, Declaration, Node, Root, Rule } from 'postcss';
-import { CssSyntaxError, parse } from 'postcss';
-import safeParser from 'postcss-safe-parser';
+import type { AtRule, Declaration, Node, Root, Rule } from "postcss";
+import { CssSyntaxError, parse } from "postcss";
+import safeParser from "postcss-safe-parser";
 import type {
   CSSModule,
   DiagnosticWithDetachedLocation,
@@ -9,17 +9,17 @@ import type {
   Token,
   TokenImporter,
   TokenReference,
-} from '../type.js';
-import { type TokenNameViolation, validateTokenName } from '../util.js';
+} from "../type.js";
+import { type TokenNameViolation, validateTokenName } from "../util.js";
 import {
   isAnimationNameProp,
   isAnimationProp,
   parseAnimationNameProp,
   parseAnimationProp,
-} from './animation-parser.js';
-import { parseImportAtRule } from './at-import-parser.js';
-import { parseValueAtRule } from './at-value-parser.js';
-import { isComposesProp, parseComposesProp } from './composes-parser.js';
+} from "./animation-parser.js";
+import { parseImportAtRule } from "./at-import-parser.js";
+import { parseValueAtRule } from "./at-value-parser.js";
+import { isComposesProp, parseComposesProp } from "./composes-parser.js";
 import {
   isContainerAtRuleName,
   isContainerNameProp,
@@ -27,7 +27,7 @@ import {
   parseContainerAtRule,
   parseContainerNameProp,
   parseContainerProp,
-} from './container-parser.js';
+} from "./container-parser.js";
 import {
   isDashedIdentAtRuleName,
   isMediaAtRuleName,
@@ -35,38 +35,43 @@ import {
   parseDashedIdentContainerQuery,
   parseDashedIdentDecl,
   parseDashedIdentMediaQuery,
-} from './dashed-ident-parser.js';
-import { parseKeyframesAtRule } from './key-frame-parser.js';
-import { parseRule } from './rule-parser.js';
+} from "./dashed-ident-parser.js";
+import { parseKeyframesAtRule } from "./key-frame-parser.js";
+import { parseRule } from "./rule-parser.js";
 
 function isAtRule(node: Node): node is AtRule {
-  return node.type === 'atrule';
+  return node.type === "atrule";
 }
 
 function isImportAtRuleName(name: string): boolean {
-  return name.toLowerCase() === 'import';
+  return name.toLowerCase() === "import";
 }
 
 function isValueAtRuleName(name: string): boolean {
-  return name.toLowerCase() === 'value';
+  return name.toLowerCase() === "value";
 }
 
 function isKeyframesAtRuleName(name: string): boolean {
-  return name.toLowerCase() === 'keyframes';
+  return name.toLowerCase() === "keyframes";
 }
 
 function isRule(node: Node): node is Rule {
-  return node.type === 'rule';
+  return node.type === "rule";
 }
 
 function isDeclaration(node: Node): node is Declaration {
-  return node.type === 'decl';
+  return node.type === "decl";
 }
 
 /**
  * Collect tokens from the AST.
  */
-function collectTokens(ast: Root, animation: boolean, dashedIdents: boolean, container: boolean) {
+function collectTokens(
+  ast: Root,
+  animation: boolean,
+  dashedIdents: boolean,
+  container: boolean,
+) {
   const allDiagnostics: DiagnosticWithDetachedLocation[] = [];
   const localTokens: Token[] = [];
   const tokenImporters: TokenImporter[] = [];
@@ -84,27 +89,36 @@ function collectTokens(ast: Root, animation: boolean, dashedIdents: boolean, con
           const reference = parseContainerAtRule(node);
           if (reference) tokenReferences.push(reference);
         }
-        if (dashedIdents) tokenReferences.push(...parseDashedIdentContainerQuery(node));
+        if (dashedIdents)
+          tokenReferences.push(...parseDashedIdentContainerQuery(node));
       } else if (isImportAtRuleName(node.name)) {
         const parsed = parseImportAtRule(node);
         if (parsed !== undefined) {
-          tokenImporters.push({ type: 'all', ...parsed });
+          tokenImporters.push({ type: "all", ...parsed });
         }
       } else if (isValueAtRuleName(node.name)) {
         const { atValue, diagnostics } = parseValueAtRule(node);
         allDiagnostics.push(...diagnostics);
         if (atValue === undefined) return;
-        if (atValue.type === 'declaration') {
-          localTokens.push({ name: atValue.name, loc: atValue.loc, declarationLoc: atValue.declarationLoc });
-        } else if (atValue.type === 'importer') {
+        if (atValue.type === "declaration") {
+          localTokens.push({
+            name: atValue.name,
+            loc: atValue.loc,
+            declarationLoc: atValue.declarationLoc,
+          });
+        } else if (atValue.type === "importer") {
           const { type: _, ...rest } = atValue;
-          tokenImporters.push({ ...rest, type: 'named' });
+          tokenImporters.push({ ...rest, type: "named" });
         }
       } else if (animation && isKeyframesAtRuleName(node.name)) {
         const { keyframe, diagnostics } = parseKeyframesAtRule(node);
         allDiagnostics.push(...diagnostics);
         if (keyframe) {
-          localTokens.push({ name: keyframe.name, loc: keyframe.loc, declarationLoc: keyframe.declarationLoc });
+          localTokens.push({
+            name: keyframe.name,
+            loc: keyframe.loc,
+            declarationLoc: keyframe.declarationLoc,
+          });
         }
       }
     } else if (isRule(node)) {
@@ -135,7 +149,12 @@ function collectTokens(ast: Root, animation: boolean, dashedIdents: boolean, con
       }
     }
   });
-  return { localTokens, tokenImporters, tokenReferences, diagnostics: allDiagnostics };
+  return {
+    localTokens,
+    tokenImporters,
+    tokenReferences,
+    diagnostics: allDiagnostics,
+  };
 }
 
 function validateTokenNames(
@@ -152,16 +171,20 @@ function validateTokenNames(
     }
   }
   for (const tokenImporter of tokenImporters) {
-    if (tokenImporter.type !== 'named') continue;
+    if (tokenImporter.type !== "named") continue;
     for (const entry of tokenImporter.entries) {
       const nameViolation = validateTokenName(entry.name, { namedExports });
       if (nameViolation) {
         diagnostics.push(createTokenNameDiagnostic(entry.loc, nameViolation));
       }
       if (entry.localName) {
-        const localNameViolation = validateTokenName(entry.localName, { namedExports });
+        const localNameViolation = validateTokenName(entry.localName, {
+          namedExports,
+        });
         if (localNameViolation) {
-          diagnostics.push(createTokenNameDiagnostic(entry.localLoc!, localNameViolation));
+          diagnostics.push(
+            createTokenNameDiagnostic(entry.localLoc!, localNameViolation),
+          );
         }
       }
     }
@@ -169,24 +192,27 @@ function validateTokenNames(
   return diagnostics;
 }
 
-function createTokenNameDiagnostic(loc: Location, violation: TokenNameViolation): DiagnosticWithDetachedLocation {
+function createTokenNameDiagnostic(
+  loc: Location,
+  violation: TokenNameViolation,
+): DiagnosticWithDetachedLocation {
   let text: string;
   switch (violation) {
-    case 'proto-not-allowed':
+    case "proto-not-allowed":
       text = `\`__proto__\` is not allowed as names.`;
       break;
-    case 'default-not-allowed':
+    case "default-not-allowed":
       text = `\`default\` is not allowed as names when \`cmkOptions.namedExports\` is set to \`true\`.`;
       break;
-    case 'backslash-not-allowed':
+    case "backslash-not-allowed":
       text = `Backslash (\\) is not allowed in names.`;
       break;
     default:
-      throw new Error('unreachable: unknown TokenNameViolation');
+      throw new Error("unreachable: unknown TokenNameViolation");
   }
   return {
     text,
-    category: 'error',
+    category: "error",
     start: loc.start,
     length: loc.end.offset - loc.start.offset,
   };
@@ -207,7 +233,14 @@ export interface ParseCSSModuleOptions {
  */
 export function parseCSSModule(
   text: string,
-  { fileName, includeSyntaxError, animation, dashedIdents, container, namedExports }: ParseCSSModuleOptions,
+  {
+    fileName,
+    includeSyntaxError,
+    animation,
+    dashedIdents,
+    container,
+    namedExports,
+  }: ParseCSSModuleOptions,
 ): CSSModule {
   let ast: Root;
   const diagnosticFile = { fileName, text };
@@ -227,25 +260,28 @@ export function parseCSSModule(
         start: { line, column },
         length: endColumn !== undefined ? endColumn - column : 1,
         text: e.reason,
-        category: 'error',
+        category: "error",
       });
     }
   } else {
     ast = safeParser(text, { from: fileName });
   }
 
-  const { localTokens, tokenImporters, tokenReferences, diagnostics } = collectTokens(
-    ast,
-    animation,
-    dashedIdents,
-    container,
-  );
-  allDiagnostics.push(...diagnostics.map((diagnostic) => ({ ...diagnostic, file: diagnosticFile })));
+  const { localTokens, tokenImporters, tokenReferences, diagnostics } =
+    collectTokens(ast, animation, dashedIdents, container);
   allDiagnostics.push(
-    ...validateTokenNames(localTokens, tokenImporters, namedExports).map((diagnostic) => ({
+    ...diagnostics.map((diagnostic) => ({
       ...diagnostic,
       file: diagnosticFile,
     })),
+  );
+  allDiagnostics.push(
+    ...validateTokenNames(localTokens, tokenImporters, namedExports).map(
+      (diagnostic) => ({
+        ...diagnostic,
+        file: diagnosticFile,
+      }),
+    ),
   );
   return {
     fileName,

@@ -1,9 +1,9 @@
-import type { AtRule } from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
-import type { DiagnosticWithDetachedLocation, Location } from '../type.js';
+import type { AtRule } from "postcss";
+import postcssValueParser from "postcss-value-parser";
+import type { DiagnosticWithDetachedLocation, Location } from "../type.js";
 
 interface ValueDeclaration {
-  type: 'declaration';
+  type: "declaration";
   name: string;
   loc: Location;
   /**
@@ -14,7 +14,7 @@ interface ValueDeclaration {
 }
 
 interface ValueImporter {
-  type: 'importer';
+  type: "importer";
   entries: {
     name: string;
     loc: Location;
@@ -53,22 +53,31 @@ export function parseValueAtRule(atValue: AtRule): ParseAtValueResult {
 function isValueImporter(nodes: postcssValueParser.Node[]): boolean {
   const fromIndex = findFromKeywordIndex(nodes);
   if (fromIndex < 1) return false;
-  const tail = nodes.slice(fromIndex + 1).filter((node) => node.type !== 'space');
-  return tail.length === 1 && tail[0]!.type === 'string';
+  const tail = nodes
+    .slice(fromIndex + 1)
+    .filter((node) => node.type !== "space");
+  return tail.length === 1 && tail[0]!.type === "string";
 }
 
 function findFromKeywordIndex(nodes: postcssValueParser.Node[]): number {
-  return nodes.findLastIndex((node) => node.type === 'word' && node.value.toLowerCase() === 'from');
+  return nodes.findLastIndex(
+    (node) => node.type === "word" && node.value.toLowerCase() === "from",
+  );
 }
 
-function parseValueImporter(atValue: AtRule, nodes: postcssValueParser.Node[]): ParseAtValueResult {
+function parseValueImporter(
+  atValue: AtRule,
+  nodes: postcssValueParser.Node[],
+): ParseAtValueResult {
   const fromIndex = findFromKeywordIndex(nodes);
-  const specifierNode = nodes.slice(fromIndex + 1).find((node) => node.type === 'string')!;
+  const specifierNode = nodes
+    .slice(fromIndex + 1)
+    .find((node) => node.type === "string")!;
 
-  const entries: ValueImporter['entries'] = [];
+  const entries: ValueImporter["entries"] = [];
   const diagnostics: DiagnosticWithDetachedLocation[] = [];
   for (const item of splitByComma(nodes.slice(0, fromIndex))) {
-    const words = item.nodes.filter((node) => node.type === 'word');
+    const words = item.nodes.filter((node) => node.type === "word");
     const nameNode = words[0];
     // An empty item (e.g. the middle item in `a,,b`) has no name, so report it like `@value;`.
     if (nameNode === undefined) {
@@ -76,36 +85,52 @@ function parseValueImporter(atValue: AtRule, nodes: postcssValueParser.Node[]): 
       diagnostics.push({
         start: { line: start.line, column: start.column },
         length: 0,
-        text: '`` is invalid syntax.',
-        category: 'error',
+        text: "`` is invalid syntax.",
+        category: "error",
       });
       continue;
     }
-    const entry: ValueImporter['entries'][number] = {
+    const entry: ValueImporter["entries"][number] = {
       name: nameNode.value,
-      loc: calcAtValueParamsLoc(atValue, nameNode.sourceIndex, nameNode.value.length),
+      loc: calcAtValueParamsLoc(
+        atValue,
+        nameNode.sourceIndex,
+        nameNode.value.length,
+      ),
     };
-    const localNode = words[1]?.value.toLowerCase() === 'as' ? words[2] : undefined;
+    const localNode =
+      words[1]?.value.toLowerCase() === "as" ? words[2] : undefined;
     if (localNode !== undefined) {
       entry.localName = localNode.value;
-      entry.localLoc = calcAtValueParamsLoc(atValue, localNode.sourceIndex, localNode.value.length);
+      entry.localLoc = calcAtValueParamsLoc(
+        atValue,
+        localNode.sourceIndex,
+        localNode.value.length,
+      );
     }
     entries.push(entry);
   }
 
   const parsedAtValue: ValueImporter = {
-    type: 'importer',
+    type: "importer",
     entries,
     from: specifierNode.value,
     // The location of the specifier without quotes.
-    fromLoc: calcAtValueParamsLoc(atValue, specifierNode.sourceIndex + 1, specifierNode.value.length),
+    fromLoc: calcAtValueParamsLoc(
+      atValue,
+      specifierNode.sourceIndex + 1,
+      specifierNode.value.length,
+    ),
   };
   return { atValue: parsedAtValue, diagnostics };
 }
 
-function parseValueDeclaration(atValue: AtRule, nodes: postcssValueParser.Node[]): ParseAtValueResult {
-  const nameNode = nodes.find((node) => node.type !== 'space');
-  if (nameNode === undefined || nameNode.type !== 'word') {
+function parseValueDeclaration(
+  atValue: AtRule,
+  nodes: postcssValueParser.Node[],
+): ParseAtValueResult {
+  const nameNode = nodes.find((node) => node.type !== "space");
+  if (nameNode === undefined || nameNode.type !== "word") {
     return {
       diagnostics: [
         {
@@ -115,15 +140,19 @@ function parseValueDeclaration(atValue: AtRule, nodes: postcssValueParser.Node[]
           },
           length: atValue.source!.end!.offset - atValue.source!.start!.offset,
           text: `\`${atValue.toString()}\` is a invalid syntax.`,
-          category: 'error',
+          category: "error",
         },
       ],
     };
   }
   const parsedAtValue: ValueDeclaration = {
-    type: 'declaration',
+    type: "declaration",
     name: nameNode.value,
-    loc: calcAtValueParamsLoc(atValue, nameNode.sourceIndex, nameNode.value.length),
+    loc: calcAtValueParamsLoc(
+      atValue,
+      nameNode.sourceIndex,
+      nameNode.value.length,
+    ),
     declarationLoc: {
       start: atValue.source!.start!,
       end: atValue.positionBy({ index: atValue.toString().length }),
@@ -137,8 +166,13 @@ function parseValueDeclaration(atValue: AtRule, nodes: postcssValueParser.Node[]
  * @param sourceIndex The index of the range in the params.
  * @param length The length of the range.
  */
-function calcAtValueParamsLoc(atValue: AtRule, sourceIndex: number, length: number): Location {
-  const baseLength = 1 + atValue.name.length + (atValue.raws.afterName?.length ?? 0);
+function calcAtValueParamsLoc(
+  atValue: AtRule,
+  sourceIndex: number,
+  length: number,
+): Location {
+  const baseLength =
+    1 + atValue.name.length + (atValue.raws.afterName?.length ?? 0);
   const startIndex = baseLength + sourceIndex;
   return {
     start: atValue.positionBy({ index: startIndex }),
@@ -156,9 +190,9 @@ interface ImportItem {
 function splitByComma(nodes: postcssValueParser.Node[]): ImportItem[] {
   const items: ImportItem[] = [{ nodes: [], sourceIndex: 0 }];
   for (const node of nodes) {
-    if (node.type === 'div' && node.value === ',') {
+    if (node.type === "div" && node.value === ",") {
       items.push({ nodes: [], sourceIndex: node.sourceEndIndex });
-    } else if (node.type !== 'space') {
+    } else if (node.type !== "space") {
       items.at(-1)!.nodes.push(node);
     }
   }

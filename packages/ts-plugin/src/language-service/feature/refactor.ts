@@ -1,16 +1,24 @@
-import { getCssModuleFileName, isComponentFileName } from '@css-modules-kit/core';
-import type ts from 'typescript';
+import {
+  getCssModuleFileName,
+  isComponentFileName,
+} from "@css-modules-kit/core";
+import type ts from "typescript";
 
 export const createCssModuleFileRefactor = {
-  name: 'Create CSS Module file',
-  description: 'Create CSS Module file',
-  actions: [{ name: 'Create CSS Module file', description: 'Create CSS Module file for current file' }],
+  name: "Create CSS Module file",
+  description: "Create CSS Module file",
+  actions: [
+    {
+      name: "Create CSS Module file",
+      description: "Create CSS Module file for current file",
+    },
+  ],
 } as const satisfies ts.ApplicableRefactorInfo;
 
 export function getApplicableRefactors(
   languageService: ts.LanguageService,
   project: ts.server.Project,
-): ts.LanguageService['getApplicableRefactors'] {
+): ts.LanguageService["getApplicableRefactors"] {
   return (...args) => {
     const [fileName] = args;
     const prior = languageService.getApplicableRefactors(...args);
@@ -24,13 +32,17 @@ export function getApplicableRefactors(
   };
 }
 
-export function getEditsForRefactor(languageService: ts.LanguageService): ts.LanguageService['getEditsForRefactor'] {
+export function getEditsForRefactor(
+  languageService: ts.LanguageService,
+): ts.LanguageService["getEditsForRefactor"] {
   return (...args) => {
     const [fileName, , , refactorName] = args;
     const prior = languageService.getEditsForRefactor(...args) ?? { edits: [] };
     if (isComponentFileName(fileName)) {
       if (refactorName === createCssModuleFileRefactor.name) {
-        prior.edits.push(createNewCssModuleFileChange(getCssModuleFileName(fileName)));
+        prior.edits.push(
+          createNewCssModuleFileChange(getCssModuleFileName(fileName)),
+        );
       }
     }
     return prior;
@@ -40,7 +52,7 @@ export function getEditsForRefactor(languageService: ts.LanguageService): ts.Lan
 function createNewCssModuleFileChange(cssFilename: string): ts.FileTextChanges {
   return {
     fileName: cssFilename,
-    textChanges: [{ span: { start: 0, length: 0 }, newText: '' }],
+    textChanges: [{ span: { start: 0, length: 0 }, newText: "" }],
     isNewFile: true,
   };
 }

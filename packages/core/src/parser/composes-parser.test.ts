@@ -1,25 +1,25 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeDeclaration } from '../test/ast.js';
-import { isComposesProp, parseComposesProp } from './composes-parser.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import { fakeDeclaration } from "../test/ast.js";
+import { isComposesProp, parseComposesProp } from "./composes-parser.js";
 
-describe('isComposesProp', () => {
+describe("isComposesProp", () => {
   test.each([
-    ['composes', true],
-    ['Composes', true],
-    ['COMPOSES', true],
-    ['compose-with', false],
-    ['a-composes', false],
-    ['composes-b', false],
-    ['color', false],
-  ])('%s -> %s', (prop, expected) => {
+    ["composes", true],
+    ["Composes", true],
+    ["COMPOSES", true],
+    ["compose-with", false],
+    ["a-composes", false],
+    ["composes-b", false],
+    ["color", false],
+  ])("%s -> %s", (prop, expected) => {
     expect(isComposesProp(prop)).toBe(expected);
   });
 });
 
-describe('parseComposesProp', () => {
-  test('extracts a local reference from a single class name', () => {
-    const decl = fakeDeclaration('.a_1 { composes: a_2 }');
+describe("parseComposesProp", () => {
+  test("extracts a local reference from a single class name", () => {
+    const decl = fakeDeclaration(".a_1 { composes: a_2 }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -42,8 +42,8 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('extracts a local reference for each space-separated class name', () => {
-    const decl = fakeDeclaration('.a_1 { composes: a_2 a_3 }');
+  test("extracts a local reference for each space-separated class name", () => {
+    const decl = fakeDeclaration(".a_1 { composes: a_2 a_3 }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -82,8 +82,8 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('extracts a local reference for each comma-separated class name', () => {
-    const decl = fakeDeclaration('.a_1 { composes: a_2, a_3 }');
+  test("extracts a local reference for each comma-separated class name", () => {
+    const decl = fakeDeclaration(".a_1 { composes: a_2, a_3 }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -122,18 +122,20 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('skips class name inside global()', () => {
-    const decl = fakeDeclaration('.a_1 { composes: global(a_2) }');
+  test("skips class name inside global()", () => {
+    const decl = fakeDeclaration(".a_1 { composes: global(a_2) }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`[]`);
   });
 
-  test('skips items with `from global`', () => {
-    const decl = fakeDeclaration('.a_1 { composes: a_2 a_3 from global }');
+  test("skips items with `from global`", () => {
+    const decl = fakeDeclaration(".a_1 { composes: a_2 a_3 from global }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`[]`);
   });
 
-  test('extracts an external reference from an item with a `from` specifier', () => {
-    const decl = fakeDeclaration(`.a_1 { composes: a_2 from './a.module.css' }`);
+  test("extracts an external reference from an item with a `from` specifier", () => {
+    const decl = fakeDeclaration(
+      `.a_1 { composes: a_2 from './a.module.css' }`,
+    );
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -173,8 +175,10 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('extracts an external reference with an entry for each class name', () => {
-    const decl = fakeDeclaration(`.a_1 { composes: a_2 a_3 from './a.module.css' }`);
+  test("extracts an external reference with an entry for each class name", () => {
+    const decl = fakeDeclaration(
+      `.a_1 { composes: a_2 a_3 from './a.module.css' }`,
+    );
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -229,8 +233,10 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('matches the `from` keyword case-insensitively', () => {
-    const decl = fakeDeclaration(`.a_1 { composes: a_2 FROM './a.module.css' }`);
+  test("matches the `from` keyword case-insensitively", () => {
+    const decl = fakeDeclaration(
+      `.a_1 { composes: a_2 FROM './a.module.css' }`,
+    );
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -270,13 +276,15 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('matches the `global` keyword case-insensitively', () => {
-    const decl = fakeDeclaration('.a_1 { composes: a_2 from GLOBAL }');
+  test("matches the `global` keyword case-insensitively", () => {
+    const decl = fakeDeclaration(".a_1 { composes: a_2 from GLOBAL }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`[]`);
   });
 
-  test('extracts local and external references according to the `from` clause of each item', () => {
-    const decl = fakeDeclaration(`.a_1 { composes: a_2, a_3 from './a.module.css', a_4 from global, a_5 }`);
+  test("extracts local and external references according to the `from` clause of each item", () => {
+    const decl = fakeDeclaration(
+      `.a_1 { composes: a_2, a_3 from './a.module.css', a_4 from global, a_5 }`,
+    );
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -348,8 +356,8 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('extracts local references from an item where `from` is not preceded by class names', () => {
-    const decl = fakeDeclaration('.a_1 { composes: from global }');
+  test("extracts local references from an item where `from` is not preceded by class names", () => {
+    const decl = fakeDeclaration(".a_1 { composes: from global }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -388,8 +396,8 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('extracts local references from an item whose `from` clause is invalid', () => {
-    const decl = fakeDeclaration('.a_1 { composes: a_2 from a_3 }');
+  test("extracts local references from an item whose `from` clause is invalid", () => {
+    const decl = fakeDeclaration(".a_1 { composes: a_2 from a_3 }");
     expect(parseComposesProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -444,7 +452,7 @@ describe('parseComposesProp', () => {
     `);
   });
 
-  test('extracts references on lines after the declaration start', () => {
+  test("extracts references on lines after the declaration start", () => {
     const decl = fakeDeclaration(dedent`
       .a_1 {
         composes:

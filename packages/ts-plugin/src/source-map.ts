@@ -1,5 +1,5 @@
-import type { CodeInformation, Mapping } from '@volar/language-core';
-import { SourceMap } from '@volar/language-core';
+import type { CodeInformation, Mapping } from "@volar/language-core";
+import { SourceMap } from "@volar/language-core";
 
 export class CustomSourceMap extends SourceMap<CodeInformation> {
   override *toSourceRange(
@@ -7,9 +7,16 @@ export class CustomSourceMap extends SourceMap<CodeInformation> {
     end: number,
     fallbackToAnyMatch: boolean,
     filter?: (data: CodeInformation) => boolean,
-  ): Generator<[number, number, Mapping<CodeInformation>, Mapping<CodeInformation>]> {
+  ): Generator<
+    [number, number, Mapping<CodeInformation>, Mapping<CodeInformation>]
+  > {
     let matched = false;
-    for (const result of super.toSourceRange(start, end, fallbackToAnyMatch, filter)) {
+    for (const result of super.toSourceRange(
+      start,
+      end,
+      fallbackToAnyMatch,
+      filter,
+    )) {
       matched = true;
       yield result;
     }
@@ -20,7 +27,12 @@ export class CustomSourceMap extends SourceMap<CodeInformation> {
     // lookup fails. Retry with the range stripped of its outer characters to recover the
     // inner token name's source range.
     if (end - start >= 2) {
-      yield* super.toSourceRange(start + 1, end - 1, fallbackToAnyMatch, filter);
+      yield* super.toSourceRange(
+        start + 1,
+        end - 1,
+        fallbackToAnyMatch,
+        filter,
+      );
     }
   }
 }

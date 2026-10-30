@@ -1,22 +1,22 @@
-import dedent from 'dedent';
-import type { Linter } from 'eslint';
-import { describe, expect, test } from 'vite-plus/test';
-import { createESLint, formatLintResults } from '../test/eslint.js';
-import { createIFF } from '../test/fixture.js';
+import dedent from "dedent";
+import type { Linter } from "eslint";
+import { describe, expect, test } from "vite-plus/test";
+import { createESLint, formatLintResults } from "../test/eslint.js";
+import { createIFF } from "../test/fixture.js";
 
 const config: Linter.Config = {
-  rules: { 'css-modules-kit/no-unused-class-names': 'error' },
+  rules: { "css-modules-kit/no-unused-class-names": "error" },
 };
 
-describe('no-unused-class-names', () => {
-  test('warns unused class names', async () => {
+describe("no-unused-class-names", () => {
+  test("warns unused class names", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .local1 {}
         .local2 {}
         .local3 {}
       `,
-      'a.tsx': dedent`
+      "a.tsx": dedent`
         import styles from './a.module.css';
         styles.local1;
       `,
@@ -49,12 +49,12 @@ describe('no-unused-class-names', () => {
       ]
     `);
   });
-  test('does not warn global class names', async () => {
+  test("does not warn global class names", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .local1, :global(.global1) {}
       `,
-      'a.ts': dedent`
+      "a.ts": dedent`
         import styles from './a.module.css';
         styles.local1;
       `,
@@ -70,13 +70,13 @@ describe('no-unused-class-names', () => {
       ]
     `);
   });
-  test('does not warn names referenced via animation-name in the same CSS', async () => {
+  test("does not warn names referenced via animation-name in the same CSS", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .local1 {}
         .local2 { animation-name: local1; }
       `,
-      'a.tsx': dedent`
+      "a.tsx": dedent`
         import styles from './a.module.css';
         styles.local2;
       `,
@@ -92,9 +92,9 @@ describe('no-unused-class-names', () => {
       ]
     `);
   });
-  test('does not warn if ts file is not found', async () => {
+  test("does not warn if ts file is not found", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .local1 {}
       `,
     });

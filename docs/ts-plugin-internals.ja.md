@@ -31,8 +31,8 @@ ts-plugin は TypeScript Language Service Plugin です。Volar.js を使って 
 
 ```ts
 declare const styles = {
-  'a_1': '',
-  'a_2': '',
+  a_1: "",
+  a_2: "",
 };
 ```
 
@@ -57,8 +57,8 @@ interface CodeMapping {
 
 ```ts
 declare const styles = {
-  'a_1': '',
-  'a_2': '',
+  a_1: "",
+  a_2: "",
 };
 export default styles;
 ```
@@ -76,7 +76,7 @@ export default styles;
 `src/a.module.css`:
 
 ```css
-@import './b.module.css';
+@import "./b.module.css";
 ```
 
 default export の場合、object spread で表現します:
@@ -84,14 +84,14 @@ default export の場合、object spread で表現します:
 ```ts
 function blockErrorType<T>(val: T): [0] extends [1 & T] ? {} : T;
 declare const styles = {
-  ...blockErrorType((await import('./b.module.css')).default),
+  ...blockErrorType((await import("./b.module.css")).default),
 };
 ```
 
 named exports の場合、barrel re-export で表現します:
 
 ```ts
-export * from './b.module.css';
+export * from "./b.module.css";
 ```
 
 ### `blockErrorType` の役割
@@ -124,18 +124,15 @@ default export の場合、次のような型定義が生成されます:
 
 ```ts
 declare const styles = {
-  'b_1': (await import('./b.module.css')).default['b_1'],
-  'aliased_b_2': (await import('./b.module.css')).default['b_2'],
+  b_1: (await import("./b.module.css")).default["b_1"],
+  aliased_b_2: (await import("./b.module.css")).default["b_2"],
 };
 ```
 
 named exports の場合、次のような型定義が生成されます:
 
 ```ts
-export {
-  'b_1' as 'b_1',
-  'b_2' as 'aliased_b_2',
-} from './b.module.css';
+export { "b_1" as "b_1", "b_2" as "aliased_b_2" } from "./b.module.css";
 ```
 
 ### LinkedCodeMapping
@@ -174,8 +171,8 @@ interface LinkedCodeMapping {
 
 ```ts
 declare const styles = {
-  'b_1': (await import('./b.module.css')).default['b_1'],
-  'aliased_b_2': (await import('./b.module.css')).default['b_2'],
+  b_1: (await import("./b.module.css")).default["b_1"],
+  aliased_b_2: (await import("./b.module.css")).default["b_2"],
 };
 ```
 
@@ -195,7 +192,7 @@ default export の場合:
 
 ```ts
 declare const styles = {
-  'a-1': '',
+  "a-1": "",
 };
 ```
 
@@ -203,7 +200,7 @@ named export の場合:
 
 ```ts
 var _token_0: string;
-export { _token_0 as 'a-1' };
+export { _token_0 as "a-1" };
 ```
 
 ### 同じトークンの複数回定義のサポート
@@ -224,7 +221,7 @@ export { _token_0 as 'a-1' };
 `src/a.ts`:
 
 ```ts
-import styles from './a.module.css';
+import styles from "./a.module.css";
 styles.a_1;
 ```
 
@@ -234,8 +231,8 @@ styles.a_1;
 
 ```ts
 declare const styles = {
-  'a_1': '',
-  'a_1': '',
+  a_1: "",
+  a_1: "",
 };
 export default styles;
 ```
@@ -253,7 +250,7 @@ named export の場合は、以下のようなコードと mapping を生成し�
 ```ts
 var _token_0: string;
 var _token_0: string;
-export { _token_0 as 'a_1' };
+export { _token_0 as "a_1" };
 ```
 
 mapping:
@@ -270,7 +267,7 @@ CSS Modules Kit の生成する型定義には、`'a_1'` のようにクオー�
 
 ```ts
 declare const styles = {
-  'a_1': string,
+  a_1: string,
 };
 ```
 
@@ -313,18 +310,21 @@ CSS では `@keyframes foo {...}` で定義したアニメーション名を `an
 `src/a.module.css`:
 
 ```css
-@keyframes a_1 {}
-.a_2 { animation-name: a_1; }
+@keyframes a_1 {
+}
+.a_2 {
+  animation-name: a_1;
+}
 ```
 
 default export の場合、次のような型定義が生成されます:
 
 ```ts
 declare const styles = {
-  'a_1': '' as string,
-  'a_2': '' as string,
+  a_1: "" as string,
+  a_2: "" as string,
 } as const;
-styles['a_1'];
+styles["a_1"];
 export default styles;
 ```
 
@@ -334,11 +334,11 @@ export default styles;
 
 ```ts
 var _token_0: string;
-export { _token_0 as 'a_1' };
+export { _token_0 as "a_1" };
 var _token_1: string;
-export { _token_1 as 'a_2' };
-declare const __self: typeof import('./a.module.css');
-__self['a_1'];
+export { _token_1 as "a_2" };
+declare const __self: typeof import("./a.module.css");
+__self["a_1"];
 ```
 
 ### External Token References (`composes: ... from '<specifier>'`) のサポート
@@ -350,17 +350,19 @@ CSS Modules では `composes: b_1 b_2 from './b.module.css';` のように、`fr
 `src/a.module.css`:
 
 ```css
-.a_1 { composes: b_1 b_2 from './b.module.css'; }
+.a_1 {
+  composes: b_1 b_2 from "./b.module.css";
+}
 ```
 
 default export の場合、次のような型定義が生成されます:
 
 ```ts
 declare const styles = {
-  'a_1': '' as string,
+  a_1: "" as string,
 } as const;
-(await import('./b.module.css')).default['b_1'];
-(await import('./b.module.css')).default['b_2'];
+(await import("./b.module.css")).default["b_1"];
+(await import("./b.module.css")).default["b_2"];
 export default styles;
 ```
 
@@ -368,7 +370,7 @@ named export の場合、次のような型定義が生成されます:
 
 ```ts
 var _token_0: string;
-export { _token_0 as 'a_1' };
-(await import('./b.module.css'))['b_1'];
-(await import('./b.module.css'))['b_2'];
+export { _token_0 as "a_1" };
+(await import("./b.module.css"))["b_1"];
+(await import("./b.module.css"))["b_2"];
 ```

@@ -60,10 +60,14 @@
  * END OF TERMS AND CONDITIONS
  */
 
-import ts from 'typescript';
+import ts from "typescript";
 
 export function defaultIsPretty() {
-  return !!ts.sys.writeOutputIsTTY && ts.sys.writeOutputIsTTY() && !process.env['NO_COLOR'];
+  return (
+    !!ts.sys.writeOutputIsTTY &&
+    ts.sys.writeOutputIsTTY() &&
+    !process.env["NO_COLOR"]
+  );
 }
 
 export function shouldBePretty(pretty: boolean | undefined): boolean {

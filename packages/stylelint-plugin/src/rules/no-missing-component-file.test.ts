@@ -1,26 +1,26 @@
-import stylelint from 'stylelint';
-import { describe, expect, test } from 'vite-plus/test';
-import { createIFF } from '../test/fixture.js';
-import { formatLinterResult } from '../test/stylelint.js';
-import { noMissingComponentFile } from './no-missing-component-file.js';
+import stylelint from "stylelint";
+import { describe, expect, test } from "vite-plus/test";
+import { createIFF } from "../test/fixture.js";
+import { formatLinterResult } from "../test/stylelint.js";
+import { noMissingComponentFile } from "./no-missing-component-file.js";
 
 async function lint(rootDir: string) {
   return stylelint.lint({
     config: {
       plugins: [noMissingComponentFile],
       rules: {
-        'css-modules-kit/no-missing-component-file': true,
+        "css-modules-kit/no-missing-component-file": true,
       },
     },
-    files: ['**/*.module.css'],
+    files: ["**/*.module.css"],
     cwd: rootDir,
   });
 }
 
-describe('no-missing-component-file', () => {
-  test('warns missing component file', async () => {
+describe("no-missing-component-file", () => {
+  test("warns missing component file", async () => {
     const iff = await createIFF({
-      'a.module.css': '.foo {}',
+      "a.module.css": ".foo {}",
     });
     const results = await lint(iff.rootDir);
     expect(formatLinterResult(results, iff.rootDir)).toMatchInlineSnapshot(`
@@ -41,10 +41,10 @@ describe('no-missing-component-file', () => {
       ]
     `);
   });
-  test('does not warn when component file exists', async () => {
+  test("does not warn when component file exists", async () => {
     const iff = await createIFF({
-      'a.module.css': '',
-      'a.tsx': '',
+      "a.module.css": "",
+      "a.tsx": "",
     });
     const results = await lint(iff.rootDir);
     expect(formatLinterResult(results, iff.rootDir)).toMatchInlineSnapshot(`

@@ -1,11 +1,11 @@
-import { defineConfig } from '@vscode/test-cli';
+import { defineConfig } from "@vscode/test-cli";
 
 const baseConfig = {
-  extensionDevelopmentPath: 'packages/vscode',
-  version: process.env.VSCODE_VERSION ?? 'stable',
+  extensionDevelopmentPath: "packages/vscode",
+  version: process.env.VSCODE_VERSION ?? "stable",
   mocha: {
     timeout: 30_000,
-    require: ['tsx/esm', './scripts/vscode-test-setup.ts'],
+    require: ["tsx/esm", "./scripts/vscode-test-setup.ts"],
   },
   download: {
     timeout: 60_000,
@@ -15,20 +15,20 @@ const baseConfig = {
 export default defineConfig([
   {
     ...baseConfig,
-    label: 'open-css-file',
-    files: 'packages/vscode/vscode-test/open-css-file.test.ts',
-    workspaceFolder: 'packages/vscode/vscode-test/fixtures/basic',
+    label: "open-css-file",
+    files: "packages/vscode/vscode-test/open-css-file.test.ts",
+    workspaceFolder: "packages/vscode/vscode-test/fixtures/basic",
   },
   {
     ...baseConfig,
-    label: 'open-ts-file',
-    files: 'packages/vscode/vscode-test/open-ts-file.test.ts',
-    workspaceFolder: 'packages/vscode/vscode-test/fixtures/basic',
+    label: "open-ts-file",
+    files: "packages/vscode/vscode-test/open-ts-file.test.ts",
+    workspaceFolder: "packages/vscode/vscode-test/fixtures/basic",
   },
   {
     ...baseConfig,
-    label: 'request-forwarding-to-tsserver',
-    files: 'packages/vscode/vscode-test/request-forwarding-to-tsserver.test.ts',
-    workspaceFolder: 'packages/vscode/vscode-test/fixtures/multiple-tsconfig',
+    label: "request-forwarding-to-tsserver",
+    files: "packages/vscode/vscode-test/request-forwarding-to-tsserver.test.ts",
+    workspaceFolder: "packages/vscode/vscode-test/fixtures/multiple-tsconfig",
   },
 ]);

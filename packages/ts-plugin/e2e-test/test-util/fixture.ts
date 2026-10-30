@@ -1,9 +1,16 @@
-import { randomUUID } from 'node:crypto';
-import { tmpdir } from 'node:os';
-import { join } from '@css-modules-kit/core';
-import { type CreateIFFResult, defineIFFCreator } from '@mizdra/inline-fixture-files';
+import { randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "@css-modules-kit/core";
+import {
+  type CreateIFFResult,
+  defineIFFCreator,
+} from "@mizdra/inline-fixture-files";
 
-const fixtureDir = join(tmpdir(), '@css-modules-kit/ts-plugin', process.env['VITEST_POOL_ID']!);
+const fixtureDir = join(
+  tmpdir(),
+  "@css-modules-kit/ts-plugin",
+  process.env["VITEST_POOL_ID"]!,
+);
 export const createIFF = defineIFFCreator({
   generateRootDir: () => join(fixtureDir, randomUUID()),
   unixStylePath: true,
@@ -12,7 +19,8 @@ export const createIFF = defineIFFCreator({
 export type Loc = { line: number; offset: number };
 
 function findAllMatches(content: string, search: string): number[] {
-  if (search.length === 0) throw new Error('Empty search string is not allowed.');
+  if (search.length === 0)
+    throw new Error("Empty search string is not allowed.");
   const matches: number[] = [];
   let pos = content.indexOf(search);
   while (pos !== -1) {
@@ -25,7 +33,7 @@ function findAllMatches(content: string, search: string): number[] {
 function offsetToLoc(content: string, offset: number): Loc {
   const before = content.slice(0, offset);
   const newlineCount = (before.match(/\n/gu) ?? []).length;
-  const lastNewline = before.lastIndexOf('\n');
+  const lastNewline = before.lastIndexOf("\n");
   return {
     line: newlineCount + 1,
     offset: before.length - (lastNewline + 1) + 1,
@@ -52,10 +60,16 @@ export interface SetupFixtureResult<T extends Files> {
    *   (exclusive end, matching tsserver's convention).
    * - Same matching/error semantics as `getLoc`.
    */
-  getRange: (file: string, search: string, index?: number) => { start: Loc; end: Loc };
+  getRange: (
+    file: string,
+    search: string,
+    index?: number,
+  ) => { start: Loc; end: Loc };
 }
 
-export async function setupFixture<const T extends Files>(files: T): Promise<SetupFixtureResult<T>> {
+export async function setupFixture<const T extends Files>(
+  files: T,
+): Promise<SetupFixtureResult<T>> {
   // oxlint-disable-next-line typescript/no-explicit-any
   const iff = (await createIFF(files)) as any;
 
@@ -66,7 +80,9 @@ export async function setupFixture<const T extends Files>(files: T): Promise<Set
     }
     const matches = findAllMatches(content, search);
     if (matches.length === 0) {
-      throw new Error(`Substring ${JSON.stringify(search)} not found in "${file}".`);
+      throw new Error(
+        `Substring ${JSON.stringify(search)} not found in "${file}".`,
+      );
     }
     if (matches.length > 1 && index === undefined) {
       throw new Error(
@@ -83,13 +99,20 @@ export async function setupFixture<const T extends Files>(files: T): Promise<Set
     return offsetToLoc(content, target);
   }
 
-  function getRange(file: string, search: string, index?: number): { start: Loc; end: Loc } {
+  function getRange(
+    file: string,
+    search: string,
+    index?: number,
+  ): { start: Loc; end: Loc } {
     const start = getLoc(file, search, index);
-    const lines = search.split('\n');
+    const lines = search.split("\n");
     if (lines.length === 1) {
-      return { start, end: { line: start.line, offset: start.offset + search.length } };
+      return {
+        start,
+        end: { line: start.line, offset: start.offset + search.length },
+      };
     }
-    const lastLine = lines[lines.length - 1] ?? '';
+    const lastLine = lines[lines.length - 1] ?? "";
     return {
       start,
       end: {

@@ -1,78 +1,97 @@
-import type ts from 'typescript';
+import type ts from "typescript";
 
 export interface CSSModulesKitRenameRequest extends ts.server.protocol.Request {
-  command: '_css-modules-kit:rename';
+  command: "_css-modules-kit:rename";
   arguments: { fileName: string; position: number };
 }
-export interface CSSModulesKitRenameHandlerResponse extends ts.server.HandlerResponse {
-  response?: { result: ReturnType<ts.LanguageService['findRenameLocations']> };
+export interface CSSModulesKitRenameHandlerResponse
+  extends ts.server.HandlerResponse {
+  response?: { result: ReturnType<ts.LanguageService["findRenameLocations"]> };
 }
-export interface CSSModulesKitRenameResponse extends ts.server.protocol.Response {
-  command: '_css-modules-kit:rename';
-  readonly body: CSSModulesKitRenameHandlerResponse['response'];
+export interface CSSModulesKitRenameResponse
+  extends ts.server.protocol.Response {
+  command: "_css-modules-kit:rename";
+  readonly body: CSSModulesKitRenameHandlerResponse["response"];
 }
 
-export interface CSSModulesKitRenameInfoRequest extends ts.server.protocol.Request {
-  command: '_css-modules-kit:renameInfo';
+export interface CSSModulesKitRenameInfoRequest
+  extends ts.server.protocol.Request {
+  command: "_css-modules-kit:renameInfo";
   arguments: { fileName: string; position: number };
 }
-export interface CSSModulesKitRenameInfoHandlerResponse extends ts.server.HandlerResponse {
-  response?: { result: ReturnType<ts.LanguageService['getRenameInfo']> };
+export interface CSSModulesKitRenameInfoHandlerResponse
+  extends ts.server.HandlerResponse {
+  response?: { result: ReturnType<ts.LanguageService["getRenameInfo"]> };
 }
-export interface CSSModulesKitRenameInfoResponse extends ts.server.protocol.Response {
-  command: '_css-modules-kit:renameInfo';
-  readonly body: CSSModulesKitRenameInfoHandlerResponse['response'];
+export interface CSSModulesKitRenameInfoResponse
+  extends ts.server.protocol.Response {
+  command: "_css-modules-kit:renameInfo";
+  readonly body: CSSModulesKitRenameInfoHandlerResponse["response"];
 }
 
-export interface CSSModulesKitGetEditsForFileRenameRequest extends ts.server.protocol.Request {
-  command: '_css-modules-kit:getEditsForFileRename';
+export interface CSSModulesKitGetEditsForFileRenameRequest
+  extends ts.server.protocol.Request {
+  command: "_css-modules-kit:getEditsForFileRename";
   arguments: { oldFilePath: string; newFilePath: string };
 }
-export interface CSSModulesKitGetEditsForFileRenameHandlerResponse extends ts.server.HandlerResponse {
-  response?: { result: ReturnType<ts.LanguageService['getEditsForFileRename']> };
+export interface CSSModulesKitGetEditsForFileRenameHandlerResponse
+  extends ts.server.HandlerResponse {
+  response?: {
+    result: ReturnType<ts.LanguageService["getEditsForFileRename"]>;
+  };
 }
-export interface CSSModulesKitGetEditsForFileRenameResponse extends ts.server.protocol.Response {
-  command: '_css-modules-kit:getEditsForFileRename';
-  readonly body: CSSModulesKitGetEditsForFileRenameHandlerResponse['response'];
+export interface CSSModulesKitGetEditsForFileRenameResponse
+  extends ts.server.protocol.Response {
+  command: "_css-modules-kit:getEditsForFileRename";
+  readonly body: CSSModulesKitGetEditsForFileRenameHandlerResponse["response"];
 }
 
 export interface DocumentLink {
   fileName: string;
   textSpan: ts.TextSpan;
 }
-export interface CSSModulesKitDocumentLinkRequest extends ts.server.protocol.Request {
-  command: '_css-modules-kit:documentLink';
+export interface CSSModulesKitDocumentLinkRequest
+  extends ts.server.protocol.Request {
+  command: "_css-modules-kit:documentLink";
   arguments: { fileName: string };
 }
-export interface CSSModulesKitDocumentLinkHandlerResponse extends ts.server.HandlerResponse {
+export interface CSSModulesKitDocumentLinkHandlerResponse
+  extends ts.server.HandlerResponse {
   response?: { result: DocumentLink[] };
 }
-export interface CSSModulesKitDocumentLinkResponse extends ts.server.protocol.Response {
-  command: '_css-modules-kit:documentLink';
-  readonly body: CSSModulesKitDocumentLinkHandlerResponse['response'];
+export interface CSSModulesKitDocumentLinkResponse
+  extends ts.server.protocol.Response {
+  command: "_css-modules-kit:documentLink";
+  readonly body: CSSModulesKitDocumentLinkHandlerResponse["response"];
 }
 
-declare module 'typescript' {
+declare module "typescript" {
   // oxlint-disable-next-line @typescript-eslint/no-namespace
   namespace server {
     export interface Session {
       addProtocolHandler(
-        command: '_css-modules-kit:rename',
-        handler: (request: CSSModulesKitRenameRequest) => CSSModulesKitRenameHandlerResponse,
+        command: "_css-modules-kit:rename",
+        handler: (
+          request: CSSModulesKitRenameRequest,
+        ) => CSSModulesKitRenameHandlerResponse,
       ): void;
       addProtocolHandler(
-        command: '_css-modules-kit:renameInfo',
-        handler: (request: CSSModulesKitRenameInfoRequest) => CSSModulesKitRenameInfoHandlerResponse,
+        command: "_css-modules-kit:renameInfo",
+        handler: (
+          request: CSSModulesKitRenameInfoRequest,
+        ) => CSSModulesKitRenameInfoHandlerResponse,
       ): void;
       addProtocolHandler(
-        command: '_css-modules-kit:getEditsForFileRename',
+        command: "_css-modules-kit:getEditsForFileRename",
         handler: (
           request: CSSModulesKitGetEditsForFileRenameRequest,
         ) => CSSModulesKitGetEditsForFileRenameHandlerResponse,
       ): void;
       addProtocolHandler(
-        command: '_css-modules-kit:documentLink',
-        handler: (request: CSSModulesKitDocumentLinkRequest) => CSSModulesKitDocumentLinkHandlerResponse,
+        command: "_css-modules-kit:documentLink",
+        handler: (
+          request: CSSModulesKitDocumentLinkRequest,
+        ) => CSSModulesKitDocumentLinkHandlerResponse,
       ): void;
     }
   }

@@ -1,30 +1,32 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import type { ExportBuilderHost } from './export-builder.js';
-import { createExportBuilder } from './export-builder.js';
-import { createResolver } from './resolver.js';
-import { readAndParseCSSModule } from './test/css-module.js';
-import { createIFF } from './test/fixture.js';
-import type { ExportBuilder } from './type.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import type { ExportBuilderHost } from "./export-builder.js";
+import { createExportBuilder } from "./export-builder.js";
+import { createResolver } from "./resolver.js";
+import { readAndParseCSSModule } from "./test/css-module.js";
+import { createIFF } from "./test/fixture.js";
+import type { ExportBuilder } from "./type.js";
 
 const resolver = createResolver({}, undefined);
 
-function prepareExportBuilder(args?: Partial<ExportBuilderHost>): ExportBuilder {
+function prepareExportBuilder(
+  args?: Partial<ExportBuilderHost>,
+): ExportBuilder {
   return createExportBuilder({
     getCSSModule: readAndParseCSSModule,
-    matchesPattern: (path) => path.endsWith('.module.css'),
+    matchesPattern: (path) => path.endsWith(".module.css"),
     resolver,
     ...args,
   });
 }
 
-describe('ExportBuilder', () => {
-  test('build export record', async () => {
+describe("ExportBuilder", () => {
+  test("build export record", async () => {
     const iff = await createIFF({
-      'a.module.css': '.a_1 { color: red; }',
+      "a.module.css": ".a_1 { color: red; }",
     });
     const exportBuilder = prepareExportBuilder();
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
     expect(exportBuilder.build(cssModule)).toMatchInlineSnapshot(`
       {
         "allTokens": [
@@ -33,21 +35,21 @@ describe('ExportBuilder', () => {
       }
     `);
   });
-  test('collect all tokens from imported modules', async () => {
+  test("collect all tokens from imported modules", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .a_1 { color: red; }
         @import './b.module.css';
         @value c_1 from './c.module.css';
       `,
-      'b.module.css': '.b_1 { color: red; }',
-      'c.module.css': dedent`
+      "b.module.css": ".b_1 { color: red; }",
+      "c.module.css": dedent`
         .c_1 { color: red; }
         .c_2 { color: red; }
       `,
     });
     const exportBuilder = prepareExportBuilder();
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
     expect(exportBuilder.build(cssModule)).toMatchInlineSnapshot(`
       {
         "allTokens": [
@@ -58,20 +60,20 @@ describe('ExportBuilder', () => {
       }
     `);
   });
-  test('collect all tokens from imported modules recursively', async () => {
+  test("collect all tokens from imported modules recursively", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .a_1 { color: red; }
         @import './b.module.css';
       `,
-      'b.module.css': dedent`
+      "b.module.css": dedent`
         .b_1 { color: red; }
         @import './c.module.css';
       `,
-      'c.module.css': '.c_1 { color: red; }',
+      "c.module.css": ".c_1 { color: red; }",
     });
     const exportBuilder = prepareExportBuilder();
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
     expect(exportBuilder.build(cssModule)).toMatchInlineSnapshot(`
       {
         "allTokens": [
@@ -82,13 +84,13 @@ describe('ExportBuilder', () => {
       }
     `);
   });
-  test('use the alias name when `@value ... as ... from ...` re-exports a token', async () => {
+  test("use the alias name when `@value ... as ... from ...` re-exports a token", async () => {
     const iff = await createIFF({
-      'a.module.css': `@value b_1 as b_alias from './b.module.css';`,
-      'b.module.css': `@value b_1: red;`,
+      "a.module.css": `@value b_1 as b_alias from './b.module.css';`,
+      "b.module.css": `@value b_1: red;`,
     });
     const exportBuilder = prepareExportBuilder();
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
     expect(exportBuilder.build(cssModule)).toMatchInlineSnapshot(`
       {
         "allTokens": [
@@ -97,36 +99,38 @@ describe('ExportBuilder', () => {
       }
     `);
   });
-  test('do not collect tokens from `@import` for unmatched or unresolvable modules', async () => {
+  test("do not collect tokens from `@import` for unmatched or unresolvable modules", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         @import './unmatched.module.css';
         @import './unresolvable.module.css';
       `,
-      'unmatched.module.css': '.unmatched_1 { color: red; }',
+      "unmatched.module.css": ".unmatched_1 { color: red; }",
     });
     const exportBuilder = prepareExportBuilder({
-      matchesPattern: (path) => path.endsWith('.module.css') && !path.endsWith('unmatched.module.css'),
+      matchesPattern: (path) =>
+        path.endsWith(".module.css") && !path.endsWith("unmatched.module.css"),
     });
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
     expect(exportBuilder.build(cssModule)).toMatchInlineSnapshot(`
       {
         "allTokens": [],
       }
     `);
   });
-  test('collect tokens from `@value ... from ...` for unmatched or unresolvable modules', async () => {
+  test("collect tokens from `@value ... from ...` for unmatched or unresolvable modules", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         @value unmatched_1 from './unmatched.module.css';
         @value unresolvable_1 from './unresolvable.module.css';
       `,
-      'unmatched.module.css': '.unmatched_1 { color: red; }',
+      "unmatched.module.css": ".unmatched_1 { color: red; }",
     });
     const exportBuilder = prepareExportBuilder({
-      matchesPattern: (path) => path.endsWith('.module.css') && !path.endsWith('unmatched.module.css'),
+      matchesPattern: (path) =>
+        path.endsWith(".module.css") && !path.endsWith("unmatched.module.css"),
     });
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
     // TODO: It should collect tokens
     expect(exportBuilder.build(cssModule)).toMatchInlineSnapshot(`
       {
@@ -135,13 +139,13 @@ describe('ExportBuilder', () => {
     `);
   });
 
-  test('cache export record and return same result on subsequent builds', async () => {
+  test("cache export record and return same result on subsequent builds", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .a_1 { color: red; }
         @import './b.module.css';
       `,
-      'b.module.css': '.b_1 { color: red; }',
+      "b.module.css": ".b_1 { color: red; }",
     });
     let getCSSModuleCalls = 0;
     const exportBuilder = prepareExportBuilder({
@@ -150,7 +154,7 @@ describe('ExportBuilder', () => {
         return readAndParseCSSModule(path);
       },
     });
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
 
     // First build should call getCSSModule
     const result1 = exportBuilder.build(cssModule);
@@ -177,13 +181,13 @@ describe('ExportBuilder', () => {
     expect(getCSSModuleCalls).toBe(1);
   });
 
-  test('clear cache and rebuild export record', async () => {
+  test("clear cache and rebuild export record", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .a_1 { color: red; }
         @import './b.module.css';
       `,
-      'b.module.css': '.b_1 { color: red; }',
+      "b.module.css": ".b_1 { color: red; }",
     });
     let getCSSModuleCalls = 0;
     const exportBuilder = prepareExportBuilder({
@@ -192,7 +196,7 @@ describe('ExportBuilder', () => {
         return readAndParseCSSModule(path);
       },
     });
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
 
     // First build
     exportBuilder.build(cssModule);
@@ -206,14 +210,14 @@ describe('ExportBuilder', () => {
     expect(getCSSModuleCalls).toBe(2);
   });
 
-  test('maintain separate cache entries for different modules', async () => {
+  test("maintain separate cache entries for different modules", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .a_1 { color: red; }
         @import './b.module.css';
       `,
-      'b.module.css': '.b_1 { color: red; }',
-      'c.module.css': dedent`
+      "b.module.css": ".b_1 { color: red; }",
+      "c.module.css": dedent`
         .c_1 { color: red; }
         @import './b.module.css';
       `,
@@ -225,8 +229,8 @@ describe('ExportBuilder', () => {
         return readAndParseCSSModule(path);
       },
     });
-    const moduleA = readAndParseCSSModule(iff.paths['a.module.css'])!;
-    const moduleC = readAndParseCSSModule(iff.paths['c.module.css'])!;
+    const moduleA = readAndParseCSSModule(iff.paths["a.module.css"])!;
+    const moduleC = readAndParseCSSModule(iff.paths["c.module.css"])!;
 
     // Build moduleA
     exportBuilder.build(moduleA);
@@ -241,19 +245,19 @@ describe('ExportBuilder', () => {
     expect(getCSSModuleCalls).toBe(2);
   });
 
-  test('handle circular dependencies', async () => {
+  test("handle circular dependencies", async () => {
     const iff = await createIFF({
-      'a.module.css': dedent`
+      "a.module.css": dedent`
         .a_1 { color: red; }
         @import './b.module.css';
       `,
-      'b.module.css': dedent`
+      "b.module.css": dedent`
         .b_1 { color: red; }
         @import './a.module.css';
       `,
     });
     const exportBuilder = prepareExportBuilder();
-    const cssModule = readAndParseCSSModule(iff.paths['a.module.css'])!;
+    const cssModule = readAndParseCSSModule(iff.paths["a.module.css"])!;
 
     // Should not cause infinite recursion
     const result = exportBuilder.build(cssModule);

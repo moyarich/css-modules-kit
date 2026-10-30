@@ -1,12 +1,12 @@
-import { AssertionError } from 'node:assert';
-import { randomUUID } from 'node:crypto';
-import { tmpdir } from 'node:os';
+import { AssertionError } from "node:assert";
+import { randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
 // oxlint-disable-next-line no-restricted-imports
-import { join } from 'node:path';
-import { setTimeout } from 'node:timers/promises';
-import { defineIFFCreator } from '@mizdra/inline-fixture-files';
+import { join } from "node:path";
+import { setTimeout } from "node:timers/promises";
+import { defineIFFCreator } from "@mizdra/inline-fixture-files";
 
-const fixtureRoot = join(tmpdir(), 'css-modules-kit-vscode-test');
+const fixtureRoot = join(tmpdir(), "css-modules-kit-vscode-test");
 export const createFixture = defineIFFCreator({
   generateRootDir: () => join(fixtureRoot, randomUUID()),
   unixStylePath: true,

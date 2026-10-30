@@ -1,8 +1,8 @@
 // oxlint-disable-next-line no-restricted-imports
-import type { ParsedPath } from 'node:path';
+import type { ParsedPath } from "node:path";
 // oxlint-disable-next-line no-restricted-imports
-import nodePath from 'node:path';
-import ts from 'typescript';
+import nodePath from "node:path";
+import ts from "typescript";
 
 export function slash(path: string): string {
   return ts.server.toNormalizedPath(path);

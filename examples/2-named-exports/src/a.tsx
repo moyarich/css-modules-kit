@@ -1,4 +1,4 @@
-import * as styles from './a.module.css';
+import * as styles from "./a.module.css";
 
 styles.a_1;
 styles.a_2;

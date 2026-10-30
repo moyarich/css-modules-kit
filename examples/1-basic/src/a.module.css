@@ -1,47 +1,62 @@
-.a_1 { color: red; }
-.a_2 { color: red; }
-.a_2 { color: red; }
+.a_1 {
+  color: red;
+}
+.a_2 {
+  color: red;
+}
+.a_2 {
+  color: red;
+}
 @value a_3: red;
-@import './b.module.css';
+@import "./b.module.css";
 @value c_1, c_2 as c_alias from './c.module.css';
 
 /** @keyframe */
-@keyframes keyframe {}
+@keyframes keyframe {
+}
 :root {
   animation-name: keyframe;
 }
 
 /* composes */
 :root {
-  composes: a_1, b_1 from './b.module.css';
+  composes:
+    a_1,
+    b_1 from "./b.module.css";
 }
 
 /* custom property */
 :root {
   --custom-property: red;
-  color: var(--custom-property), var(--custom-property from './c.module.css');
+  color: var(--custom-property), var(--custom-property from "./c.module.css");
 }
-@container style(--custom-property) {}
-@container style(color: var(--custom-property)) {}
+@container style(--custom-property) {
+}
+@container style(color: var(--custom-property)) {
+}
 
 /* @property */
-@property --property {}
+@property --property {
+}
 :root {
   color: var(--property);
 }
 
 /* @custom-media */
 @custom-media --custom-media (max-width: 30em);
-@media (--custom-media) {}
+@media (--custom-media) {
+}
 
 /* @font-palette-values */
-@font-palette-values --font-palette {}
+@font-palette-values --font-palette {
+}
 :root {
   font-palette: --font-palette;
 }
 
 /* @position-try */
-@position-try --position-try {}
+@position-try --position-try {
+}
 :root {
   position-try-fallbacks: --position-try;
 }
@@ -68,4 +83,5 @@
 :root {
   container-name: container;
 }
-@container container (width > 400px) {}
+@container container (width > 400px) {
+}
