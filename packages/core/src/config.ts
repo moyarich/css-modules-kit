@@ -1,10 +1,10 @@
-import ts from 'typescript';
-import { TsConfigFileNotFoundError } from './error.js';
-import { basename, dirname, join, relative, resolve } from './path.js';
-import type { Diagnostic } from './type.js';
+import ts from "typescript";
+import { TsConfigFileNotFoundError } from "./error.js";
+import { basename, dirname, join, relative, resolve } from "./path.js";
+import type { Diagnostic } from "./type.js";
 
 // https://github.com/microsoft/TypeScript/blob/caf1aee269d1660b4d2a8b555c2d602c97cb28d7/src/compiler/commandLineParser.ts#L3006
-const DEFAULT_INCLUDE_SPEC = '**/*';
+const DEFAULT_INCLUDE_SPEC = "**/*";
 
 /**
  * The config used by css-modules-kit.
@@ -95,136 +95,167 @@ interface ParsedRawData {
 
 function findTsConfigFile(project: string): string | undefined {
   const configFile = ts.sys.directoryExists(project)
-    ? ts.findConfigFile(project, ts.sys.fileExists.bind(ts.sys), 'tsconfig.json')
-    : ts.findConfigFile(dirname(project), ts.sys.fileExists.bind(ts.sys), basename(project));
+    ? ts.findConfigFile(
+        project,
+        ts.sys.fileExists.bind(ts.sys),
+        "tsconfig.json",
+      )
+    : ts.findConfigFile(
+        dirname(project),
+        ts.sys.fileExists.bind(ts.sys),
+        basename(project),
+      );
   if (!configFile) return undefined;
   return resolve(configFile);
 }
 
 function isTsConfigFileExists(fileName: string): boolean {
-  return ts.findConfigFile(dirname(fileName), ts.sys.fileExists.bind(ts.sys), basename(fileName)) !== undefined;
+  return (
+    ts.findConfigFile(
+      dirname(fileName),
+      ts.sys.fileExists.bind(ts.sys),
+      basename(fileName),
+    ) !== undefined
+  );
 }
 
-function parseRawData(raw: unknown, tsConfigSourceFile: ts.TsConfigSourceFile, basePath: string): ParsedRawData {
+function parseRawData(
+  raw: unknown,
+  tsConfigSourceFile: ts.TsConfigSourceFile,
+  basePath: string,
+): ParsedRawData {
   const result: ParsedRawData = {
     config: {},
     diagnostics: [],
   };
-  if (typeof raw !== 'object' || raw === null) return result;
+  if (typeof raw !== "object" || raw === null) return result;
 
   // `tsConfigSourceFile.configFileSpecs` contains `includes` and `excludes`. However, it is an internal API.
   // So we collect `includes` and `excludes` from `parsedCommandLine.raw` without the internal API.
 
-  if ('include' in raw) {
+  if ("include" in raw) {
     if (Array.isArray(raw.include)) {
-      const includes = raw.include.filter((i) => typeof i === 'string');
+      const includes = raw.include.filter((i) => typeof i === "string");
       result.config.includes = includes;
     }
     // MEMO: The errors for this option are reported by `tsc` or `tsserver`, so we don't need to report.
   }
-  if ('exclude' in raw) {
+  if ("exclude" in raw) {
     if (Array.isArray(raw.exclude)) {
-      const excludes = raw.exclude.filter((e) => typeof e === 'string');
+      const excludes = raw.exclude.filter((e) => typeof e === "string");
       result.config.excludes = excludes;
     }
     // MEMO: The errors for this option are reported by `tsc` or `tsserver`, so we don't need to report.
   }
-  if ('cmkOptions' in raw && typeof raw.cmkOptions === 'object' && raw.cmkOptions !== null) {
-    if ('enabled' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.enabled === 'boolean') {
+  if (
+    "cmkOptions" in raw &&
+    typeof raw.cmkOptions === "object" &&
+    raw.cmkOptions !== null
+  ) {
+    if ("enabled" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.enabled === "boolean") {
         result.config.enabled = raw.cmkOptions.enabled;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`enabled\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
         });
       }
     }
-    if ('dtsOutDir' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.dtsOutDir === 'string') {
-        result.config.dtsOutDir = startsWithConfigDirTemplate(raw.cmkOptions.dtsOutDir)
+    if ("dtsOutDir" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.dtsOutDir === "string") {
+        result.config.dtsOutDir = startsWithConfigDirTemplate(
+          raw.cmkOptions.dtsOutDir,
+        )
           ? raw.cmkOptions.dtsOutDir
-          : relative(basePath, join(dirname(tsConfigSourceFile.fileName), raw.cmkOptions.dtsOutDir));
+          : relative(
+              basePath,
+              join(
+                dirname(tsConfigSourceFile.fileName),
+                raw.cmkOptions.dtsOutDir,
+              ),
+            );
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`dtsOutDir\` in ${tsConfigSourceFile.fileName} must be a string.`,
           // MEMO: Location information can be obtained from `tsConfigSourceFile.statements`, but this is complicated and will be omitted.
         });
       }
     }
-    if ('arbitraryExtensions' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.arbitraryExtensions === 'boolean') {
+    if ("arbitraryExtensions" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.arbitraryExtensions === "boolean") {
         result.config.arbitraryExtensions = raw.cmkOptions.arbitraryExtensions;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`arbitraryExtensions\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
           // MEMO: Location information can be obtained from `tsConfigSourceFile.statements`, but this is complicated and will be omitted.
         });
       }
     }
-    if ('animation' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.animation === 'boolean') {
+    if ("animation" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.animation === "boolean") {
         result.config.animation = raw.cmkOptions.animation;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`animation\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
         });
       }
     }
-    if ('keyframes' in raw.cmkOptions) {
+    if ("keyframes" in raw.cmkOptions) {
       result.diagnostics.push({
-        category: 'warning',
+        category: "warning",
         text: `\`keyframes\` in ${tsConfigSourceFile.fileName} is deprecated. Use the \`animation\` option instead.`,
       });
-      if (typeof raw.cmkOptions.keyframes === 'boolean') {
+      if (typeof raw.cmkOptions.keyframes === "boolean") {
         result.config.keyframes = raw.cmkOptions.keyframes;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`keyframes\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
         });
       }
     }
-    if ('dashedIdents' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.dashedIdents === 'boolean') {
+    if ("dashedIdents" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.dashedIdents === "boolean") {
         result.config.dashedIdents = raw.cmkOptions.dashedIdents;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`dashedIdents\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
         });
       }
     }
-    if ('container' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.container === 'boolean') {
+    if ("container" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.container === "boolean") {
         result.config.container = raw.cmkOptions.container;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`container\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
         });
       }
     }
-    if ('namedExports' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.namedExports === 'boolean') {
+    if ("namedExports" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.namedExports === "boolean") {
         result.config.namedExports = raw.cmkOptions.namedExports;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`namedExports\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
           // MEMO: Location information can be obtained from `tsConfigSourceFile.statements`, but this is complicated and will be omitted.
         });
       }
     }
-    if ('prioritizeNamedImports' in raw.cmkOptions) {
-      if (typeof raw.cmkOptions.prioritizeNamedImports === 'boolean') {
-        result.config.prioritizeNamedImports = raw.cmkOptions.prioritizeNamedImports;
+    if ("prioritizeNamedImports" in raw.cmkOptions) {
+      if (typeof raw.cmkOptions.prioritizeNamedImports === "boolean") {
+        result.config.prioritizeNamedImports =
+          raw.cmkOptions.prioritizeNamedImports;
       } else {
         result.diagnostics.push({
-          category: 'error',
+          category: "error",
           text: `\`prioritizeNamedImports\` in ${tsConfigSourceFile.fileName} must be a boolean.`,
           // MEMO: Location information can be obtained from `tsConfigSourceFile.statements`, but this is complicated and will be omitted.
         });
@@ -235,7 +266,10 @@ function parseRawData(raw: unknown, tsConfigSourceFile: ts.TsConfigSourceFile, b
 }
 
 function parseTsConfigFile(fileName: string, basePath: string) {
-  const tsConfigSourceFile = ts.readJsonConfigFile(fileName, ts.sys.readFile.bind(ts.sys));
+  const tsConfigSourceFile = ts.readJsonConfigFile(
+    fileName,
+    ts.sys.readFile.bind(ts.sys),
+  );
   // MEMO: `tsConfigSourceFile.parseDiagnostics` (Internal API) contains a syntax error for `tsconfig.json`.
   // However, it is ignored so that ts-plugin will work even if `tsconfig.json` is somewhat broken.
   // Also, this error is reported to the user by `tsc` or `tsserver`.
@@ -250,19 +284,25 @@ function parseTsConfigFile(fileName: string, basePath: string) {
     undefined,
     [
       {
-        extension: 'css',
+        extension: "css",
         isMixedContent: false,
         scriptKind: ts.ScriptKind.Deferred,
       },
     ],
   );
   // Read options from `parsedCommandLine.raw`
-  const parsedRawData = parseRawData(parsedCommandLine.raw, tsConfigSourceFile, basePath);
+  const parsedRawData = parseRawData(
+    parsedCommandLine.raw,
+    tsConfigSourceFile,
+    basePath,
+  );
 
   return {
     extendedSourceFiles: tsConfigSourceFile.extendedSourceFiles,
     compilerOptions: parsedCommandLine.options,
-    wildcardDirectories: Object.entries(parsedCommandLine.wildcardDirectories ?? {}).map(([fileName, flags]) => ({
+    wildcardDirectories: Object.entries(
+      parsedCommandLine.wildcardDirectories ?? {},
+    ).map(([fileName, flags]) => ({
       fileName,
       recursive: (flags & ts.WatchDirectoryFlags.Recursive) !== 0,
     })),
@@ -278,7 +318,7 @@ function startsWithConfigDirTemplate(path: string) {
 
 // https://github.com/microsoft/TypeScript/blob/55423abe4d029017f19b6e4c32097591994836b4/src/compiler/commandLineParser.ts#L3299-L3328
 function getSubstitutedPath(path: string, basePath: string) {
-  return join(basePath, path.replace(configDirTemplate, './'));
+  return join(basePath, path.replace(configDirTemplate, "./"));
 }
 
 /**
@@ -303,14 +343,20 @@ export function readConfigFile(project: string): CMKConfig {
       if (isTsConfigFileExists(extendedSourceFile)) {
         const base = parseTsConfigFile(extendedSourceFile, basePath);
         parsedTsConfig.config = { ...base.config, ...parsedTsConfig.config };
-        parsedTsConfig.diagnostics = [...base.diagnostics, ...parsedTsConfig.diagnostics];
+        parsedTsConfig.diagnostics = [
+          ...base.diagnostics,
+          ...parsedTsConfig.diagnostics,
+        ];
       }
     }
   }
 
-  if (parsedTsConfig.config.animation !== undefined && parsedTsConfig.config.keyframes !== undefined) {
+  if (
+    parsedTsConfig.config.animation !== undefined &&
+    parsedTsConfig.config.keyframes !== undefined
+  ) {
     parsedTsConfig.diagnostics.push({
-      category: 'error',
+      category: "error",
       text: `\`keyframes\` and \`animation\` in ${configFileName} cannot be used together. Remove \`keyframes\`.`,
     });
   }
@@ -318,15 +364,24 @@ export function readConfigFile(project: string): CMKConfig {
   return {
     // If `include` is not specified, fallback to the default include spec。
     // ref: https://github.com/microsoft/TypeScript/blob/caf1aee269d1660b4d2a8b555c2d602c97cb28d7/src/compiler/commandLineParser.ts#L3102
-    includes: (parsedTsConfig.config.includes ?? [DEFAULT_INCLUDE_SPEC]).map((path) =>
+    includes: (parsedTsConfig.config.includes ?? [DEFAULT_INCLUDE_SPEC]).map(
+      (path) => getSubstitutedPath(path, basePath),
+    ),
+    excludes: (parsedTsConfig.config.excludes ?? []).map((path) =>
       getSubstitutedPath(path, basePath),
     ),
-    excludes: (parsedTsConfig.config.excludes ?? []).map((path) => getSubstitutedPath(path, basePath)),
-    dtsOutDir: getSubstitutedPath(parsedTsConfig.config.dtsOutDir ?? 'generated', basePath),
+    dtsOutDir: getSubstitutedPath(
+      parsedTsConfig.config.dtsOutDir ?? "generated",
+      basePath,
+    ),
     arbitraryExtensions: parsedTsConfig.config.arbitraryExtensions ?? false,
     namedExports: parsedTsConfig.config.namedExports ?? false,
-    prioritizeNamedImports: parsedTsConfig.config.prioritizeNamedImports ?? false,
-    animation: parsedTsConfig.config.animation ?? parsedTsConfig.config.keyframes ?? true,
+    prioritizeNamedImports:
+      parsedTsConfig.config.prioritizeNamedImports ?? false,
+    animation:
+      parsedTsConfig.config.animation ??
+      parsedTsConfig.config.keyframes ??
+      true,
     dashedIdents: parsedTsConfig.config.dashedIdents ?? false,
     container: parsedTsConfig.config.container ?? false,
     enabled: parsedTsConfig.config.enabled ?? false,

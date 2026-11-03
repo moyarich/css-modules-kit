@@ -1,5 +1,5 @@
-import type { AtRule, Declaration } from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
+import type { AtRule, Declaration } from "postcss";
+import postcssValueParser from "postcss-value-parser";
 import type {
   DiagnosticWithDetachedLocation,
   ExternalTokenReference,
@@ -7,29 +7,35 @@ import type {
   LocalTokenReference,
   Token,
   TokenReference,
-} from '../type.js';
+} from "../type.js";
 
 /** Properties that declare a `<dashed-ident>` in their value. */
-const DECLARING_PROP_RE = /^(?:anchor-name|view-timeline-name|scroll-timeline-name|view-timeline|scroll-timeline)$/iu;
+const DECLARING_PROP_RE =
+  /^(?:anchor-name|view-timeline-name|scroll-timeline-name|view-timeline|scroll-timeline)$/iu;
 
 /** Properties that reference a `<dashed-ident>` in their value. */
 const REFERENCING_PROP_RE =
   /^(?:position-anchor|anchor-scope|animation-timeline|font-palette|position-try|position-try-fallbacks|timeline-scope)$/iu;
 
 /** The role a bare `<dashed-ident>` plays in a value position. */
-type BareDashedIdentRole = 'definition' | 'reference' | 'none';
+type BareDashedIdentRole = "definition" | "reference" | "none";
 
 function getBareDashedIdentRole(prop: string): BareDashedIdentRole {
-  if (DECLARING_PROP_RE.test(prop)) return 'definition';
-  if (REFERENCING_PROP_RE.test(prop)) return 'reference';
-  return 'none';
+  if (DECLARING_PROP_RE.test(prop)) return "definition";
+  if (REFERENCING_PROP_RE.test(prop)) return "reference";
+  return "none";
 }
 
 /** At-rules that declare a `<dashed-ident>` in their prelude. */
-const DASHED_IDENT_AT_RULE_NAMES = new Set(['property', 'custom-media', 'font-palette-values', 'position-try']);
+const DASHED_IDENT_AT_RULE_NAMES = new Set([
+  "property",
+  "custom-media",
+  "font-palette-values",
+  "position-try",
+]);
 
 function isCustomPropertyDecl(prop: string): boolean {
-  return prop.startsWith('--');
+  return prop.startsWith("--");
 }
 
 export function isDashedIdentAtRuleName(name: string): boolean {
@@ -68,11 +74,15 @@ interface ParseAtRuleResult {
  * `--foo` in `@property --foo {...}` or `@custom-media --foo (...)`.
  */
 export function parseDashedIdentAtRule(atRule: AtRule): ParseAtRuleResult {
-  const nameNode = postcssValueParser(atRule.params).nodes.find((n) => n.type === 'word');
-  if (!nameNode || !nameNode.value.startsWith('--')) return { diagnostics: [] };
+  const nameNode = postcssValueParser(atRule.params).nodes.find(
+    (n) => n.type === "word",
+  );
+  if (!nameNode || !nameNode.value.startsWith("--")) return { diagnostics: [] };
 
   const name = nameNode.value;
-  const startIndex = `@${atRule.name}${atRule.raws.afterName ?? ''}`.length + nameNode.sourceIndex;
+  const startIndex =
+    `@${atRule.name}${atRule.raws.afterName ?? ""}`.length +
+    nameNode.sourceIndex;
   return {
     token: {
       name,
@@ -90,7 +100,7 @@ export function parseDashedIdentAtRule(atRule: AtRule): ParseAtRuleResult {
 }
 
 export function isMediaAtRuleName(name: string): boolean {
-  return name.toLowerCase() === 'media';
+  return name.toLowerCase() === "media";
 }
 
 /**
@@ -103,7 +113,7 @@ export function parseDashedIdentMediaQuery(atRule: AtRule): TokenReference[] {
   // A custom media reference is always parenthesized (it sits where a media feature does),
   // which postcss-value-parser represents as a function node with an empty name.
   for (const node of postcssValueParser(atRule.params).nodes) {
-    if (node.type === 'function' && node.value === '') {
+    if (node.type === "function" && node.value === "") {
       references.push(...collectFromConditionOrQuery(atRule, node.nodes));
     }
   }
@@ -116,12 +126,14 @@ export function parseDashedIdentMediaQuery(atRule: AtRule): TokenReference[] {
  * Boolean style queries (e.g. `style((--a: red) or (--b: blue))`) and `style()` nested
  * in a condition are also extracted.
  */
-export function parseDashedIdentContainerQuery(atRule: AtRule): TokenReference[] {
+export function parseDashedIdentContainerQuery(
+  atRule: AtRule,
+): TokenReference[] {
   const references: TokenReference[] = [];
   const walk = (nodes: postcssValueParser.Node[]): void => {
     for (const node of nodes) {
-      if (node.type !== 'function') continue;
-      if (node.value.toLowerCase() === 'style') {
+      if (node.type !== "function") continue;
+      if (node.value.toLowerCase() === "style") {
         references.push(...collectFromConditionOrQuery(atRule, node.nodes));
       } else {
         walk(node.nodes);
@@ -138,18 +150,25 @@ export function parseDashedIdentContainerQuery(atRule: AtRule): TokenReference[]
  * (e.g. `(--a) or (--b)`, `not (--a)`). Functions within values (e.g. `var(--b)` in `--a: var(--b)`)
  * are parsed like declaration values, so the `from` clause of `var()` is honored.
  */
-function collectFromConditionOrQuery(atRule: AtRule, nodes: postcssValueParser.Node[]): TokenReference[] {
+function collectFromConditionOrQuery(
+  atRule: AtRule,
+  nodes: postcssValueParser.Node[],
+): TokenReference[] {
   const references: TokenReference[] = [];
   const walk = (nodes: postcssValueParser.Node[]): void => {
-    const nameNode = nodes.find((n) => n.type === 'word' && n.value.startsWith('--'));
+    const nameNode = nodes.find(
+      (n) => n.type === "word" && n.value.startsWith("--"),
+    );
     if (nameNode) references.push(createLocalReference(atRule, nameNode));
     for (const node of nodes) {
-      if (node.type !== 'function') continue;
+      if (node.type !== "function") continue;
       // A parenthesized group is represented as a function node with an empty name.
-      if (node.value === '') {
+      if (node.value === "") {
         walk(node.nodes);
       } else {
-        references.push(...collectFromValueNodes(atRule, [node], 'none').references);
+        references.push(
+          ...collectFromValueNodes(atRule, [node], "none").references,
+        );
       }
     }
   };
@@ -169,11 +188,15 @@ function calcPropLoc(decl: Declaration): Location {
  * given its source index and length. The parsed value is the declaration value
  * when `parent` is a declaration, or the params when `parent` is an at-rule.
  */
-function calcValueLoc(parent: Declaration | AtRule, sourceIndex: number, length: number): Location {
+function calcValueLoc(
+  parent: Declaration | AtRule,
+  sourceIndex: number,
+  length: number,
+): Location {
   const base =
-    parent.type === 'decl'
+    parent.type === "decl"
       ? parent.prop.length + parent.raws.between!.length
-      : `@${parent.name}${parent.raws.afterName ?? ''}`.length;
+      : `@${parent.name}${parent.raws.afterName ?? ""}`.length;
   return {
     start: parent.positionBy({ index: base + sourceIndex }),
     end: parent.positionBy({ index: base + sourceIndex + length }),
@@ -181,7 +204,11 @@ function calcValueLoc(parent: Declaration | AtRule, sourceIndex: number, length:
 }
 
 function collectFromDeclValue(decl: Declaration): ParseDeclResult {
-  return collectFromValueNodes(decl, postcssValueParser(decl.value).nodes, getBareDashedIdentRole(decl.prop));
+  return collectFromValueNodes(
+    decl,
+    postcssValueParser(decl.value).nodes,
+    getBareDashedIdentRole(decl.prop),
+  );
 }
 
 function collectFromValueNodes(
@@ -190,24 +217,30 @@ function collectFromValueNodes(
   role: BareDashedIdentRole,
 ): ParseDeclResult {
   const result: ParseDeclResult = { localTokens: [], references: [] };
-  const walk = (nodes: postcssValueParser.Node[], role: BareDashedIdentRole): void => {
+  const walk = (
+    nodes: postcssValueParser.Node[],
+    role: BareDashedIdentRole,
+  ): void => {
     for (const node of nodes) {
-      if (node.type === 'function') {
+      if (node.type === "function") {
         const fn = node.value.toLowerCase();
-        if (fn === 'var') {
+        if (fn === "var") {
           walkVar(node);
-        } else if (fn === 'env') {
+        } else if (fn === "env") {
           walkEnv(node);
-        } else if (fn === 'anchor' || fn === 'anchor-size') {
+        } else if (fn === "anchor" || fn === "anchor-size") {
           // The `<dashed-ident>` argument references an anchor declared by `anchor-name`.
-          walk(node.nodes, 'reference');
+          walk(node.nodes, "reference");
         } else {
-          walk(node.nodes, 'none');
+          walk(node.nodes, "none");
         }
-      } else if (node.type === 'word' && node.value.startsWith('--')) {
-        if (role === 'definition') {
-          result.localTokens.push({ name: node.value, loc: calcNodeLoc(parent, node) });
-        } else if (role === 'reference') {
+      } else if (node.type === "word" && node.value.startsWith("--")) {
+        if (role === "definition") {
+          result.localTokens.push({
+            name: node.value,
+            loc: calcNodeLoc(parent, node),
+          });
+        } else if (role === "reference") {
           result.references.push(createLocalReference(parent, node));
         }
       }
@@ -220,18 +253,18 @@ function collectFromValueNodes(
     const [firstArg, fallback] = splitAtFirstComma(fn.nodes);
     const reference = parseVarFirstArg(parent, firstArg);
     if (reference) result.references.push(reference);
-    walk(fallback, 'none');
+    walk(fallback, "none");
   };
 
   const walkEnv = (fn: postcssValueParser.FunctionNode): void => {
     // `env( <first-arg> , <fallback>? )`: the first argument holds the environment
     // variable name; the fallback is an arbitrary value.
     const [firstArg, fallback] = splitAtFirstComma(fn.nodes);
-    const nameNode = firstArg.find((n) => n.type !== 'space');
-    if (nameNode?.type === 'word' && nameNode.value.startsWith('--')) {
+    const nameNode = firstArg.find((n) => n.type !== "space");
+    if (nameNode?.type === "word" && nameNode.value.startsWith("--")) {
       result.references.push(createLocalReference(parent, nameNode));
     }
-    walk(fallback, 'none');
+    walk(fallback, "none");
   };
 
   walk(nodes, role);
@@ -243,27 +276,36 @@ function parseVarFirstArg(
   parent: Declaration | AtRule,
   firstArg: postcssValueParser.Node[],
 ): TokenReference | undefined {
-  const meaningful = firstArg.filter((n) => n.type !== 'space');
+  const meaningful = firstArg.filter((n) => n.type !== "space");
   const nameNode = meaningful[0];
-  if (nameNode?.type !== 'word' || !nameNode.value.startsWith('--')) return undefined;
+  if (nameNode?.type !== "word" || !nameNode.value.startsWith("--"))
+    return undefined;
 
-  const fromIndex = meaningful.findIndex((n) => n.type === 'word' && n.value.toLowerCase() === 'from');
+  const fromIndex = meaningful.findIndex(
+    (n) => n.type === "word" && n.value.toLowerCase() === "from",
+  );
   if (fromIndex === -1) return createLocalReference(parent, nameNode);
 
   const tail = meaningful.slice(fromIndex + 1);
   const specifier = tail.length === 1 ? tail[0] : undefined;
-  if (specifier?.type === 'string') {
+  if (specifier?.type === "string") {
     return createExternalReference(parent, nameNode, specifier);
   }
   // `from global` does not produce a token reference.
-  if (specifier?.type === 'word' && specifier.value.toLowerCase() === 'global') {
+  if (
+    specifier?.type === "word" &&
+    specifier.value.toLowerCase() === "global"
+  ) {
     return undefined;
   }
   return createLocalReference(parent, nameNode);
 }
 
-function createLocalReference(parent: Declaration | AtRule, node: postcssValueParser.Node): LocalTokenReference {
-  return { type: 'local', name: node.value, loc: calcNodeLoc(parent, node) };
+function createLocalReference(
+  parent: Declaration | AtRule,
+  node: postcssValueParser.Node,
+): LocalTokenReference {
+  return { type: "local", name: node.value, loc: calcNodeLoc(parent, node) };
 }
 
 function createExternalReference(
@@ -272,21 +314,30 @@ function createExternalReference(
   specifierNode: postcssValueParser.StringNode,
 ): ExternalTokenReference {
   return {
-    type: 'external',
+    type: "external",
     entries: [{ name: nameNode.value, loc: calcNodeLoc(parent, nameNode) }],
     from: specifierNode.value,
     // The location of the specifier without quotes.
-    fromLoc: calcValueLoc(parent, specifierNode.sourceIndex + 1, specifierNode.value.length),
+    fromLoc: calcValueLoc(
+      parent,
+      specifierNode.sourceIndex + 1,
+      specifierNode.value.length,
+    ),
   };
 }
 
-function calcNodeLoc(parent: Declaration | AtRule, node: postcssValueParser.Node): Location {
+function calcNodeLoc(
+  parent: Declaration | AtRule,
+  node: postcssValueParser.Node,
+): Location {
   return calcValueLoc(parent, node.sourceIndex, node.value.length);
 }
 
 /** Split function arguments at the first top-level comma into the first argument and the remaining fallback nodes. */
-function splitAtFirstComma(nodes: postcssValueParser.Node[]): [postcssValueParser.Node[], postcssValueParser.Node[]] {
-  const index = nodes.findIndex((n) => n.type === 'div' && n.value === ',');
+function splitAtFirstComma(
+  nodes: postcssValueParser.Node[],
+): [postcssValueParser.Node[], postcssValueParser.Node[]] {
+  const index = nodes.findIndex((n) => n.type === "div" && n.value === ",");
   if (index === -1) return [nodes, []];
   return [nodes.slice(0, index), nodes.slice(index + 1)];
 }

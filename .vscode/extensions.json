@@ -1,3 +1,7 @@
 {
-  "recommendations": ["oxc.oxc-vscode", "vitest.explorer", "mizdra.css-modules-kit-vscode"]
+  "recommendations": [
+    "oxc.oxc-vscode",
+    "vitest.explorer",
+    "mizdra.css-modules-kit-vscode"
+  ]
 }

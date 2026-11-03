@@ -1,7 +1,7 @@
-import { parseArgs } from 'node:util';
-import { resolve } from '@css-modules-kit/core';
-import packageJson from '../package.json' with { type: 'json' };
-import { ParseCLIArgsError } from './error.js';
+import { parseArgs } from "node:util";
+import { resolve } from "@css-modules-kit/core";
+import packageJson from "../package.json" with { type: "json" };
+import { ParseCLIArgsError } from "./error.js";
 
 // NOTE: Keep this help text in sync with the one in packages/codegen/README.md.
 const helpText = `
@@ -44,13 +44,13 @@ export function parseCLIArgs(args: string[], cwd: string): ParsedArgs {
     const { values } = parseArgs({
       args,
       options: {
-        help: { type: 'boolean', short: 'h', default: false },
-        version: { type: 'boolean', short: 'v', default: false },
-        project: { type: 'string', short: 'p', default: '.' },
-        pretty: { type: 'boolean' },
-        clean: { type: 'boolean', default: false },
-        watch: { type: 'boolean', short: 'w', default: false },
-        preserveWatchOutput: { type: 'boolean', default: false },
+        help: { type: "boolean", short: "h", default: false },
+        version: { type: "boolean", short: "v", default: false },
+        project: { type: "string", short: "p", default: "." },
+        pretty: { type: "boolean" },
+        clean: { type: "boolean", default: false },
+        watch: { type: "boolean", short: "w", default: false },
+        preserveWatchOutput: { type: "boolean", default: false },
       },
       allowNegative: true,
     });

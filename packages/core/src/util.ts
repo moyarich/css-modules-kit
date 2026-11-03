@@ -1,6 +1,9 @@
-import type { Root } from 'postcss';
-import { isAnimationNameProp, parseAnimationNameProp } from './parser/animation-parser.js';
-import { isComposesProp, parseComposesProp } from './parser/composes-parser.js';
+import type { Root } from "postcss";
+import {
+  isAnimationNameProp,
+  parseAnimationNameProp,
+} from "./parser/animation-parser.js";
+import { isComposesProp, parseComposesProp } from "./parser/composes-parser.js";
 
 export function isPosixRelativePath(path: string): boolean {
   return path.startsWith(`./`) || path.startsWith(`../`);
@@ -8,9 +11,9 @@ export function isPosixRelativePath(path: string): boolean {
 
 /** The type of token name violation. */
 export type TokenNameViolation =
-  | 'proto-not-allowed' // `__proto__` is not allowed
-  | 'default-not-allowed' // `default` is not allowed when namedExports is true
-  | 'backslash-not-allowed'; // Backslash (`\`) is not allowed
+  | "proto-not-allowed" // `__proto__` is not allowed
+  | "default-not-allowed" // `default` is not allowed when namedExports is true
+  | "backslash-not-allowed"; // Backslash (`\`) is not allowed
 
 export interface ValidateTokenNameOptions {
   namedExports: boolean;
@@ -22,10 +25,13 @@ export interface ValidateTokenNameOptions {
  * @param options The validation options.
  * @returns The violation, or `undefined` if the name is valid.
  */
-export function validateTokenName(name: string, options: ValidateTokenNameOptions): TokenNameViolation | undefined {
-  if (name === '__proto__') return 'proto-not-allowed';
-  if (options.namedExports && name === 'default') return 'default-not-allowed';
-  if (name.includes('\\')) return 'backslash-not-allowed';
+export function validateTokenName(
+  name: string,
+  options: ValidateTokenNameOptions,
+): TokenNameViolation | undefined {
+  if (name === "__proto__") return "proto-not-allowed";
+  if (options.namedExports && name === "default") return "default-not-allowed";
+  if (name.includes("\\")) return "backslash-not-allowed";
   return undefined;
 }
 
@@ -47,7 +53,10 @@ const TOKEN_CONSUMER_PATTERN =
  * collected by walking `root` so that callers can pass an already-parsed
  * PostCSS AST to avoid an extra parse.
  */
-export function findUsedTokenNames(componentText: string, root: Root): Set<string> {
+export function findUsedTokenNames(
+  componentText: string,
+  root: Root,
+): Set<string> {
   const usedClassNames = new Set<string>();
   for (const match of componentText.matchAll(TOKEN_CONSUMER_PATTERN)) {
     const name = match[1] ?? match[2] ?? match[3];
@@ -65,7 +74,7 @@ export function findUsedTokenNames(componentText: string, root: Root): Set<strin
     for (const reference of references) {
       // External references point to tokens of another file, so they do not
       // mark same-named tokens of the current file as used.
-      if (reference.type !== 'local') continue;
+      if (reference.type !== "local") continue;
       usedClassNames.add(reference.name);
     }
   });

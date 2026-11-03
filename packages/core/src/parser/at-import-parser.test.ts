@@ -1,9 +1,9 @@
-import dedent from 'dedent';
-import { expect, test } from 'vite-plus/test';
-import { fakeAtImports, fakeRoot } from '../test/ast.js';
-import { parseImportAtRule } from './at-import-parser.js';
+import dedent from "dedent";
+import { expect, test } from "vite-plus/test";
+import { fakeAtImports, fakeRoot } from "../test/ast.js";
+import { parseImportAtRule } from "./at-import-parser.js";
 
-test('parseImportAtRule', () => {
+test("parseImportAtRule", () => {
   const atImports = fakeAtImports(
     fakeRoot(dedent`
       @import;

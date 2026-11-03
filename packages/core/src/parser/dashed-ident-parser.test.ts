@@ -1,30 +1,31 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeAtRule, fakeDeclaration } from '../test/ast.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import { fakeAtRule, fakeDeclaration } from "../test/ast.js";
 import {
   isDashedIdentAtRuleName,
   parseDashedIdentAtRule,
   parseDashedIdentContainerQuery,
   parseDashedIdentDecl,
   parseDashedIdentMediaQuery,
-} from './dashed-ident-parser.js';
+} from "./dashed-ident-parser.js";
 
-describe('isDashedIdentAtRuleName', () => {
+describe("isDashedIdentAtRuleName", () => {
   test.each([
-    ['property', true],
-    ['custom-media', true],
-    ['font-palette-values', true],
-    ['position-try', true],
-    ['keyframes', false],
-    ['import', false],
-  ])('%s -> %s', (name, expected) => {
+    ["property", true],
+    ["custom-media", true],
+    ["font-palette-values", true],
+    ["position-try", true],
+    ["keyframes", false],
+    ["import", false],
+  ])("%s -> %s", (name, expected) => {
     expect(isDashedIdentAtRuleName(name)).toBe(expected);
   });
 });
 
-describe('parseDashedIdentDecl', () => {
-  test('extracts a local token from a custom property declaration', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { --foo: red }'))).toMatchInlineSnapshot(`
+describe("parseDashedIdentDecl", () => {
+  test("extracts a local token from a custom property declaration", () => {
+    expect(parseDashedIdentDecl(fakeDeclaration(".a { --foo: red }")))
+      .toMatchInlineSnapshot(`
       {
         "localTokens": [
           {
@@ -48,8 +49,9 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference from var()', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: var(--foo) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from var()", () => {
+    expect(parseDashedIdentDecl(fakeDeclaration(".a { color: var(--foo) }")))
+      .toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -74,9 +76,12 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts an external reference from var() with a file specifier', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration(`.a { color: var(--foo from "./b.module.css") }`)))
-      .toMatchInlineSnapshot(`
+  test("extracts an external reference from var() with a file specifier", () => {
+    expect(
+      parseDashedIdentDecl(
+        fakeDeclaration(`.a { color: var(--foo from "./b.module.css") }`),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -118,8 +123,12 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('omits a reference from var() with a global specifier', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: var(--foo from global) }'))).toMatchInlineSnapshot(`
+  test("omits a reference from var() with a global specifier", () => {
+    expect(
+      parseDashedIdentDecl(
+        fakeDeclaration(".a { color: var(--foo from global) }"),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [],
@@ -129,8 +138,12 @@ describe('parseDashedIdentDecl', () => {
 
   // MEMO: css-modules-kit does not guarantee how a malformed `from` clause is parsed, but the current
   // implementation falls back to a local reference. This test merely documents that behavior.
-  test('extracts a local reference from var() with a malformed from clause', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: var(--foo from bar) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from var() with a malformed from clause", () => {
+    expect(
+      parseDashedIdentDecl(
+        fakeDeclaration(".a { color: var(--foo from bar) }"),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -155,8 +168,12 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference nested in a var() fallback', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: var(--foo, var(--fallback)) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference nested in a var() fallback", () => {
+    expect(
+      parseDashedIdentDecl(
+        fakeDeclaration(".a { color: var(--foo, var(--fallback)) }"),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -197,8 +214,10 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference from a var() nested in another function', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: rgb(var(--foo)) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from a var() nested in another function", () => {
+    expect(
+      parseDashedIdentDecl(fakeDeclaration(".a { color: rgb(var(--foo)) }")),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -223,8 +242,9 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference from env()', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: env(--foo) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from env()", () => {
+    expect(parseDashedIdentDecl(fakeDeclaration(".a { color: env(--foo) }")))
+      .toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -249,8 +269,12 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('omits a reference from env() with a non-dashed-ident name', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { color: env(safe-area-inset-top) }'))).toMatchInlineSnapshot(`
+  test("omits a reference from env() with a non-dashed-ident name", () => {
+    expect(
+      parseDashedIdentDecl(
+        fakeDeclaration(".a { color: env(safe-area-inset-top) }"),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [],
@@ -258,8 +282,9 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference from font-palette', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { font-palette: --foo }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from font-palette", () => {
+    expect(parseDashedIdentDecl(fakeDeclaration(".a { font-palette: --foo }")))
+      .toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -284,8 +309,9 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local token from a name-defining property value', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { anchor-name: --foo }'))).toMatchInlineSnapshot(`
+  test("extracts a local token from a name-defining property value", () => {
+    expect(parseDashedIdentDecl(fakeDeclaration(".a { anchor-name: --foo }")))
+      .toMatchInlineSnapshot(`
       {
         "localTokens": [
           {
@@ -309,8 +335,10 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference from an anchor() function', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { top: anchor(--foo top) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from an anchor() function", () => {
+    expect(
+      parseDashedIdentDecl(fakeDeclaration(".a { top: anchor(--foo top) }")),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -335,8 +363,12 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('extracts a local reference from an anchor-size() function', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { width: anchor-size(--foo width) }'))).toMatchInlineSnapshot(`
+  test("extracts a local reference from an anchor-size() function", () => {
+    expect(
+      parseDashedIdentDecl(
+        fakeDeclaration(".a { width: anchor-size(--foo width) }"),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [
@@ -361,8 +393,9 @@ describe('parseDashedIdentDecl', () => {
     `);
   });
 
-  test('omits a token from a bare dashed-ident in an unrecognized property', () => {
-    expect(parseDashedIdentDecl(fakeDeclaration('.a { width: --foo }'))).toMatchInlineSnapshot(`
+  test("omits a token from a bare dashed-ident in an unrecognized property", () => {
+    expect(parseDashedIdentDecl(fakeDeclaration(".a { width: --foo }")))
+      .toMatchInlineSnapshot(`
       {
         "localTokens": [],
         "references": [],
@@ -371,8 +404,8 @@ describe('parseDashedIdentDecl', () => {
   });
 });
 
-describe('parseDashedIdentAtRule', () => {
-  test('extracts the name from a block at-rule', () => {
+describe("parseDashedIdentAtRule", () => {
+  test("extracts the name from a block at-rule", () => {
     expect(
       parseDashedIdentAtRule(
         fakeAtRule(dedent`
@@ -417,8 +450,12 @@ describe('parseDashedIdentAtRule', () => {
     `);
   });
 
-  test('extracts the name from a statement at-rule', () => {
-    expect(parseDashedIdentAtRule(fakeAtRule('@custom-media --foo (min-width: 30em);'))).toMatchInlineSnapshot(`
+  test("extracts the name from a statement at-rule", () => {
+    expect(
+      parseDashedIdentAtRule(
+        fakeAtRule("@custom-media --foo (min-width: 30em);"),
+      ),
+    ).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
         "token": {
@@ -453,9 +490,13 @@ describe('parseDashedIdentAtRule', () => {
   });
 });
 
-describe('parseDashedIdentMediaQuery', () => {
-  test('extracts a reference from a custom media query', () => {
-    expect(parseDashedIdentMediaQuery(fakeAtRule('@media (--narrow) and (min-width: 30em) {}'))).toMatchInlineSnapshot(`
+describe("parseDashedIdentMediaQuery", () => {
+  test("extracts a reference from a custom media query", () => {
+    expect(
+      parseDashedIdentMediaQuery(
+        fakeAtRule("@media (--narrow) and (min-width: 30em) {}"),
+      ),
+    ).toMatchInlineSnapshot(`
       [
         {
           "loc": {
@@ -477,12 +518,15 @@ describe('parseDashedIdentMediaQuery', () => {
     `);
   });
 
-  test('omits a reference from a non-custom-media feature query', () => {
-    expect(parseDashedIdentMediaQuery(fakeAtRule('@media (min-width: 30em) {}'))).toMatchInlineSnapshot(`[]`);
+  test("omits a reference from a non-custom-media feature query", () => {
+    expect(
+      parseDashedIdentMediaQuery(fakeAtRule("@media (min-width: 30em) {}")),
+    ).toMatchInlineSnapshot(`[]`);
   });
 
-  test('extracts a reference from a custom media query nested in a condition', () => {
-    expect(parseDashedIdentMediaQuery(fakeAtRule('@media (not (--narrow)) {}'))).toMatchInlineSnapshot(`
+  test("extracts a reference from a custom media query nested in a condition", () => {
+    expect(parseDashedIdentMediaQuery(fakeAtRule("@media (not (--narrow)) {}")))
+      .toMatchInlineSnapshot(`
       [
         {
           "loc": {
@@ -505,9 +549,13 @@ describe('parseDashedIdentMediaQuery', () => {
   });
 });
 
-describe('parseDashedIdentContainerQuery', () => {
-  test('extracts a reference from a style query', () => {
-    expect(parseDashedIdentContainerQuery(fakeAtRule('@container style(--accent: blue) {}'))).toMatchInlineSnapshot(`
+describe("parseDashedIdentContainerQuery", () => {
+  test("extracts a reference from a style query", () => {
+    expect(
+      parseDashedIdentContainerQuery(
+        fakeAtRule("@container style(--accent: blue) {}"),
+      ),
+    ).toMatchInlineSnapshot(`
       [
         {
           "loc": {
@@ -529,8 +577,12 @@ describe('parseDashedIdentContainerQuery', () => {
     `);
   });
 
-  test('extracts a reference from a style query in a named container', () => {
-    expect(parseDashedIdentContainerQuery(fakeAtRule('@container sidebar style(--accent) {}'))).toMatchInlineSnapshot(`
+  test("extracts a reference from a style query in a named container", () => {
+    expect(
+      parseDashedIdentContainerQuery(
+        fakeAtRule("@container sidebar style(--accent) {}"),
+      ),
+    ).toMatchInlineSnapshot(`
       [
         {
           "loc": {
@@ -555,9 +607,12 @@ describe('parseDashedIdentContainerQuery', () => {
   // A style query tests the computed value of a property rather than declaring it. So even for
   // a name-defining property like `anchor-name`, the queried `--foo` refers to a name declared
   // elsewhere and must be a reference, not a token definition.
-  test('extracts a reference from a name-defining property in a style query', () => {
-    expect(parseDashedIdentContainerQuery(fakeAtRule('@container style(anchor-name: --foo) {}')))
-      .toMatchInlineSnapshot(`
+  test("extracts a reference from a name-defining property in a style query", () => {
+    expect(
+      parseDashedIdentContainerQuery(
+        fakeAtRule("@container style(anchor-name: --foo) {}"),
+      ),
+    ).toMatchInlineSnapshot(`
         [
           {
             "loc": {
@@ -579,8 +634,12 @@ describe('parseDashedIdentContainerQuery', () => {
       `);
   });
 
-  test('extracts a reference from a style feature nested in a style query', () => {
-    expect(parseDashedIdentContainerQuery(fakeAtRule('@container style((--accent)) {}'))).toMatchInlineSnapshot(`
+  test("extracts a reference from a style feature nested in a style query", () => {
+    expect(
+      parseDashedIdentContainerQuery(
+        fakeAtRule("@container style((--accent)) {}"),
+      ),
+    ).toMatchInlineSnapshot(`
       [
         {
           "loc": {
@@ -602,9 +661,12 @@ describe('parseDashedIdentContainerQuery', () => {
     `);
   });
 
-  test('extracts an external reference from a var() with a file specifier in a style query value', () => {
-    expect(parseDashedIdentContainerQuery(fakeAtRule(`@container style(--a: var(--b from "./c.module.css")) {}`)))
-      .toMatchInlineSnapshot(`
+  test("extracts an external reference from a var() with a file specifier in a style query value", () => {
+    expect(
+      parseDashedIdentContainerQuery(
+        fakeAtRule(`@container style(--a: var(--b from "./c.module.css")) {}`),
+      ),
+    ).toMatchInlineSnapshot(`
         [
           {
             "loc": {
@@ -659,9 +721,12 @@ describe('parseDashedIdentContainerQuery', () => {
       `);
   });
 
-  test('extracts a reference from a var() in a style query value', () => {
-    expect(parseDashedIdentContainerQuery(fakeAtRule('@container style(--accent: var(--theme)) {}')))
-      .toMatchInlineSnapshot(`
+  test("extracts a reference from a var() in a style query value", () => {
+    expect(
+      parseDashedIdentContainerQuery(
+        fakeAtRule("@container style(--accent: var(--theme)) {}"),
+      ),
+    ).toMatchInlineSnapshot(`
       [
         {
           "loc": {

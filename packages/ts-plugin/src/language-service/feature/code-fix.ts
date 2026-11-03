@@ -1,13 +1,18 @@
-import type { CMKConfig, Resolver } from '@css-modules-kit/core';
-import { isCSSModuleFile } from '@css-modules-kit/core';
-import type { Language } from '@volar/language-core';
-import type ts from 'typescript';
-import { convertDefaultImportsToNamespaceImports, createPreferencesForCompletion } from '../../util.js';
-import { getPropertyAccessExpressionAtPosition } from '../ast.js';
+import type { CMKConfig, Resolver } from "@css-modules-kit/core";
+import { isCSSModuleFile } from "@css-modules-kit/core";
+import type { Language } from "@volar/language-core";
+import type ts from "typescript";
+import {
+  convertDefaultImportsToNamespaceImports,
+  createPreferencesForCompletion,
+} from "../../util.js";
+import { getPropertyAccessExpressionAtPosition } from "../ast.js";
 
 // ref: https://github.com/microsoft/TypeScript/blob/220706eb0320ff46fad8bf80a5e99db624ee7dfb/src/compiler/diagnosticMessages.json
 export const CANNOT_FIND_NAME_ERROR_CODE = 2304;
-export const PROPERTY_DOES_NOT_EXIST_ERROR_CODES: [number, number] = [2339, 2551];
+export const PROPERTY_DOES_NOT_EXIST_ERROR_CODES: [number, number] = [
+  2339, 2551,
+];
 
 export function getCodeFixesAtPosition(
   language: Language<string>,
@@ -15,9 +20,17 @@ export function getCodeFixesAtPosition(
   project: ts.server.Project,
   resolver: Resolver,
   config: CMKConfig,
-): ts.LanguageService['getCodeFixesAtPosition'] {
+): ts.LanguageService["getCodeFixesAtPosition"] {
   return (...args) => {
-    const [fileName, start, end, errorCodes, formatOptions, preferences, ...rest] = args;
+    const [
+      fileName,
+      start,
+      end,
+      errorCodes,
+      formatOptions,
+      preferences,
+      ...rest
+    ] = args;
     const prior = Array.from(
       languageService.getCodeFixesAtPosition(
         fileName,
@@ -36,13 +49,29 @@ export function getCodeFixesAtPosition(
     }
 
     // If a user is trying to use a non-existent token (e.g. `styles.nonExistToken`), provide a code fix to add the token.
-    if (errorCodes.some((errorCode) => PROPERTY_DOES_NOT_EXIST_ERROR_CODES.includes(errorCode))) {
-      const tokenConsumer = getTokenConsumerAtPosition(fileName, start, languageService, project, config);
+    if (
+      errorCodes.some((errorCode) =>
+        PROPERTY_DOES_NOT_EXIST_ERROR_CODES.includes(errorCode),
+      )
+    ) {
+      const tokenConsumer = getTokenConsumerAtPosition(
+        fileName,
+        start,
+        languageService,
+        project,
+        config,
+      );
       if (tokenConsumer) {
         prior.push({
-          fixName: 'fixMissingCSSRule',
+          fixName: "fixMissingCSSRule",
           description: `Add missing CSS rule '.${tokenConsumer.tokenName}'`,
-          changes: [createInsertRuleFileChange(tokenConsumer.from, tokenConsumer.tokenName, language)],
+          changes: [
+            createInsertRuleFileChange(
+              tokenConsumer.from,
+              tokenConsumer.tokenName,
+              language,
+            ),
+          ],
         });
       }
     }
@@ -54,9 +83,13 @@ export function getCodeFixesAtPosition(
 /**
  * Exclude code fixes that add named imports (e.g. `import { foo } from './a.module.css'`)
  */
-function excludeNamedImports(codeFixes: ts.CodeFixAction[], fileName: string, resolver: Resolver): void {
+function excludeNamedImports(
+  codeFixes: ts.CodeFixAction[],
+  fileName: string,
+  resolver: Resolver,
+): void {
   for (const codeFix of codeFixes) {
-    if (codeFix.fixName !== 'import') continue;
+    if (codeFix.fixName !== "import") continue;
     const match = codeFix.description.match(/^Add import from "(.*)"$/u);
     if (!match) continue;
     const specifier = match[1]!;
@@ -64,9 +97,13 @@ function excludeNamedImports(codeFixes: ts.CodeFixAction[], fileName: string, re
     if (!resolved || !isCSSModuleFile(resolved)) continue;
 
     for (const change of codeFix.changes) {
-      change.textChanges = change.textChanges.filter((textChange) => !textChange.newText.startsWith(`import {`));
+      change.textChanges = change.textChanges.filter(
+        (textChange) => !textChange.newText.startsWith(`import {`),
+      );
     }
-    codeFix.changes = codeFix.changes.filter((change) => change.textChanges.length > 0);
+    codeFix.changes = codeFix.changes.filter(
+      (change) => change.textChanges.length > 0,
+    );
   }
 }
 
@@ -88,9 +125,14 @@ function getTokenConsumerAtPosition(
   project: ts.server.Project,
   config: CMKConfig,
 ): TokenConsumer | undefined {
-  const sourceFile = project.getSourceFile(project.projectService.toPath(fileName));
+  const sourceFile = project.getSourceFile(
+    project.projectService.toPath(fileName),
+  );
   if (!sourceFile) return undefined;
-  const propertyAccessExpression = getPropertyAccessExpressionAtPosition(sourceFile, position);
+  const propertyAccessExpression = getPropertyAccessExpressionAtPosition(
+    sourceFile,
+    position,
+  );
   if (!propertyAccessExpression) return undefined;
 
   // Check if the expression of property access expression (e.g. `styles` in `styles.foo`) is imported from a CSS module.
@@ -98,19 +140,31 @@ function getTokenConsumerAtPosition(
   // `expression` is the expression of the property access expression (e.g. `styles` in `styles.foo`).
   const expression = propertyAccessExpression.expression;
 
-  let [definition] = languageService.getDefinitionAtPosition(fileName, expression.getStart()) ?? [];
+  let [definition] =
+    languageService.getDefinitionAtPosition(fileName, expression.getStart()) ??
+    [];
   if (!definition) return undefined;
 
   // `definition` is may be `styles` definition in CSS Modules file.
   if (isCSSModuleFile(definition.fileName)) {
-    return { tokenName: propertyAccessExpression.name.text, from: definition.fileName };
+    return {
+      tokenName: propertyAccessExpression.name.text,
+      from: definition.fileName,
+    };
   } else if (config.namedExports) {
     // If namespaced import is used, it may be a definition in a component file
     // (e.g. the `styles` of `import * as styles from './a.module.css'`).
     // In that case, we need to call `getDefinitionAtPosition` again to get the definition in CSS module file.
-    [definition] = languageService.getDefinitionAtPosition(definition.fileName, definition.textSpan.start) ?? [];
+    [definition] =
+      languageService.getDefinitionAtPosition(
+        definition.fileName,
+        definition.textSpan.start,
+      ) ?? [];
     if (definition && isCSSModuleFile(definition.fileName)) {
-      return { tokenName: propertyAccessExpression.name.text, from: definition.fileName };
+      return {
+        tokenName: propertyAccessExpression.name.text,
+        from: definition.fileName,
+      };
     }
   }
   return undefined;
@@ -125,13 +179,23 @@ function createInsertRuleFileChange(
   if (script) {
     return {
       fileName: cssModuleFileName,
-      textChanges: [{ span: { start: script.snapshot.getLength(), length: 0 }, newText: `\n.${className} {\n  \n}` }],
+      textChanges: [
+        {
+          span: { start: script.snapshot.getLength(), length: 0 },
+          newText: `\n.${className} {\n  \n}`,
+        },
+      ],
       isNewFile: false,
     };
   } else {
     return {
       fileName: cssModuleFileName,
-      textChanges: [{ span: { start: 0, length: 0 }, newText: `.${className} {\n  \n}\n\n` }],
+      textChanges: [
+        {
+          span: { start: 0, length: 0 },
+          newText: `.${className} {\n  \n}\n\n`,
+        },
+      ],
       isNewFile: true,
     };
   }

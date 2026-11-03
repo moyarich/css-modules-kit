@@ -1,9 +1,12 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { parseCSSModule, type ParseCSSModuleOptions } from './css-module-parser.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import {
+  parseCSSModule,
+  type ParseCSSModuleOptions,
+} from "./css-module-parser.js";
 
 const options: ParseCSSModuleOptions = {
-  fileName: '/test.module.css',
+  fileName: "/test.module.css",
   includeSyntaxError: true,
   animation: true,
   dashedIdents: false,
@@ -11,8 +14,8 @@ const options: ParseCSSModuleOptions = {
   namedExports: false,
 };
 
-describe('parseCSSModule', () => {
-  test('collects local tokens', () => {
+describe("parseCSSModule", () => {
+  test("collects local tokens", () => {
     const parsed = parseCSSModule(
       dedent`
         .basic {}
@@ -495,7 +498,7 @@ describe('parseCSSModule', () => {
     	}
     `);
   });
-  test('collects token importers', () => {
+  test("collects token importers", () => {
     const parsed = parseCSSModule(
       dedent`
         @import './a.module.css';
@@ -593,7 +596,7 @@ describe('parseCSSModule', () => {
       }
     `);
   });
-  test('collects token references', () => {
+  test("collects token references", () => {
     const parsed = parseCSSModule(
       dedent`
         @keyframes a_1 {}
@@ -685,7 +688,7 @@ describe('parseCSSModule', () => {
       }
     `);
   });
-  test('collects token references from composes declarations', () => {
+  test("collects token references from composes declarations", () => {
     const parsed = parseCSSModule(
       dedent`
         .a_1 { color: red; }
@@ -714,7 +717,7 @@ describe('parseCSSModule', () => {
       ]
     `);
   });
-  test('collects token references from animation shorthand declarations', () => {
+  test("collects token references from animation shorthand declarations", () => {
     const parsed = parseCSSModule(
       dedent`
         @keyframes a_1 {}
@@ -743,7 +746,7 @@ describe('parseCSSModule', () => {
       ]
     `);
   });
-  test('collects diagnostics', () => {
+  test("collects diagnostics", () => {
     const parsed = parseCSSModule(
       dedent`
         :local .local1 {}
@@ -830,7 +833,7 @@ describe('parseCSSModule', () => {
   // TODO: Support local tokens by custom identifiers. This is supported by lightningcss.
   // https://github.com/parcel-bundler/lightningcss/blob/a3390fd4140ca87f5035595d22bc9357cf72177e/src/css_modules.rs#L43
   // https://developer.mozilla.org/ja/docs/Web/CSS/custom-ident
-  test('reports diagnostics if the CSS is invalid', () => {
+  test("reports diagnostics if the CSS is invalid", () => {
     expect(
       parseCSSModule(
         dedent`
@@ -890,7 +893,7 @@ describe('parseCSSModule', () => {
     	  "tokenReferences": [],
     	}
     `);
-    expect(parseCSSModule('badword', options)).toMatchInlineSnapshot(`
+    expect(parseCSSModule("badword", options)).toMatchInlineSnapshot(`
     	{
     	  "diagnostics": [
     	    {
@@ -915,7 +918,7 @@ describe('parseCSSModule', () => {
     	}
     `);
   });
-  test('does not include syntax error in diagnostics if includeSyntaxError is false', () => {
+  test("does not include syntax error in diagnostics if includeSyntaxError is false", () => {
     expect(
       parseCSSModule(
         dedent`
@@ -962,7 +965,7 @@ describe('parseCSSModule', () => {
     	}
     `);
   });
-  test('reports diagnostics for `__proto__` in token names', () => {
+  test("reports diagnostics for `__proto__` in token names", () => {
     const parsed = parseCSSModule(
       dedent`
         .__proto__ {}
@@ -1020,7 +1023,7 @@ describe('parseCSSModule', () => {
       ]
     `);
   });
-  test('reports diagnostics for `default` in token names when namedExports is true', () => {
+  test("reports diagnostics for `default` in token names when namedExports is true", () => {
     const parsed = parseCSSModule(
       dedent`
         .default {}
@@ -1078,11 +1081,11 @@ describe('parseCSSModule', () => {
       ]
     `);
   });
-  test('does not report diagnostics for `default` in token names when namedExports is false', () => {
-    const parsed = parseCSSModule('.default {}', options);
+  test("does not report diagnostics for `default` in token names when namedExports is false", () => {
+    const parsed = parseCSSModule(".default {}", options);
     expect(parsed.diagnostics).toEqual([]);
   });
-  test('reports diagnostics for backslash in token names', () => {
+  test("reports diagnostics for backslash in token names", () => {
     // NOTE: The backslash is valid syntax in class selectors, but it is invalid syntax in `@value`.
     // Therefore, it is sufficient for diagnostics to be reported only for class selectors.
     const parsed = parseCSSModule(`.a\\1 {}`, options);
@@ -1105,27 +1108,39 @@ describe('parseCSSModule', () => {
       ]
     `);
   });
-  test('does not include the token of keyframes if animation is false', () => {
-    const cssModule = parseCSSModule('@keyframes slide-in {}', { ...options, animation: false });
+  test("does not include the token of keyframes if animation is false", () => {
+    const cssModule = parseCSSModule("@keyframes slide-in {}", {
+      ...options,
+      animation: false,
+    });
     expect(cssModule.localTokens).toMatchInlineSnapshot(`[]`);
   });
-  test('collects local tokens from dashed-ident declarations', () => {
-    const cssModule = parseCSSModule(':root { --foo: red; }', { ...options, dashedIdents: true });
-    expect(cssModule.localTokens.map((token) => token.name)).toMatchInlineSnapshot(`
+  test("collects local tokens from dashed-ident declarations", () => {
+    const cssModule = parseCSSModule(":root { --foo: red; }", {
+      ...options,
+      dashedIdents: true,
+    });
+    expect(cssModule.localTokens.map((token) => token.name))
+      .toMatchInlineSnapshot(`
       [
         "--foo",
       ]
     `);
   });
-  test('collects token references from dashed-ident references', () => {
-    const cssModule = parseCSSModule(':root { color: var(--foo); }', { ...options, dashedIdents: true });
-    expect(cssModule.tokenReferences.map((ref) => ref.type === 'local' && ref.name)).toMatchInlineSnapshot(`
+  test("collects token references from dashed-ident references", () => {
+    const cssModule = parseCSSModule(":root { color: var(--foo); }", {
+      ...options,
+      dashedIdents: true,
+    });
+    expect(
+      cssModule.tokenReferences.map((ref) => ref.type === "local" && ref.name),
+    ).toMatchInlineSnapshot(`
       [
         "--foo",
       ]
     `);
   });
-  test('matches at-rule names case-insensitively', () => {
+  test("matches at-rule names case-insensitively", () => {
     const cssModule = parseCSSModule(
       dedent`
         @IMPORT './a.module.css';
@@ -1134,15 +1149,25 @@ describe('parseCSSModule', () => {
       `,
       options,
     );
-    expect(cssModule.tokenImporters.map((importer) => importer.from)).toStrictEqual(['./a.module.css']);
-    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual(['b', 'fade']);
+    expect(
+      cssModule.tokenImporters.map((importer) => importer.from),
+    ).toStrictEqual(["./a.module.css"]);
+    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual([
+      "b",
+      "fade",
+    ]);
   });
-  test('does not collect dashed-ident tokens if dashedIdents is false', () => {
-    const cssModule = parseCSSModule('.a_1 { --foo: red; color: var(--foo); }', { ...options, dashedIdents: false });
-    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual(['a_1']);
+  test("does not collect dashed-ident tokens if dashedIdents is false", () => {
+    const cssModule = parseCSSModule(
+      ".a_1 { --foo: red; color: var(--foo); }",
+      { ...options, dashedIdents: false },
+    );
+    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual([
+      "a_1",
+    ]);
     expect(cssModule.tokenReferences).toStrictEqual([]);
   });
-  test('collects container name tokens and references if container is true', () => {
+  test("collects container name tokens and references if container is true", () => {
     const cssModule = parseCSSModule(
       dedent`
         .a_1 { container-name: foo; }
@@ -1150,10 +1175,15 @@ describe('parseCSSModule', () => {
       `,
       { ...options, container: true },
     );
-    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual(['a_1', 'foo']);
-    expect(cssModule.tokenReferences.map((ref) => ref.type === 'local' && ref.name)).toStrictEqual(['foo']);
+    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual([
+      "a_1",
+      "foo",
+    ]);
+    expect(
+      cssModule.tokenReferences.map((ref) => ref.type === "local" && ref.name),
+    ).toStrictEqual(["foo"]);
   });
-  test('does not collect container name tokens or references if container is false', () => {
+  test("does not collect container name tokens or references if container is false", () => {
     const cssModule = parseCSSModule(
       dedent`
         .a_1 { container-name: foo; }
@@ -1161,7 +1191,9 @@ describe('parseCSSModule', () => {
       `,
       { ...options, container: false },
     );
-    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual(['a_1']);
+    expect(cssModule.localTokens.map((token) => token.name)).toStrictEqual([
+      "a_1",
+    ]);
     expect(cssModule.tokenReferences).toStrictEqual([]);
   });
 });

@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeAtRule, fakeDeclaration } from '../test/ast.js';
+import { describe, expect, test } from "vite-plus/test";
+import { fakeAtRule, fakeDeclaration } from "../test/ast.js";
 import {
   isContainerAtRuleName,
   isContainerNameProp,
@@ -7,43 +7,43 @@ import {
   parseContainerAtRule,
   parseContainerNameProp,
   parseContainerProp,
-} from './container-parser.js';
+} from "./container-parser.js";
 
-describe('isContainerNameProp', () => {
+describe("isContainerNameProp", () => {
   test.each([
-    ['container-name', true],
-    ['Container-Name', true],
-    ['container', false],
-    ['color', false],
-  ])('%s -> %s', (prop, expected) => {
+    ["container-name", true],
+    ["Container-Name", true],
+    ["container", false],
+    ["color", false],
+  ])("%s -> %s", (prop, expected) => {
     expect(isContainerNameProp(prop)).toBe(expected);
   });
 });
 
-describe('isContainerProp', () => {
+describe("isContainerProp", () => {
   test.each([
-    ['container', true],
-    ['Container', true],
-    ['container-name', false],
-    ['color', false],
-  ])('%s -> %s', (prop, expected) => {
+    ["container", true],
+    ["Container", true],
+    ["container-name", false],
+    ["color", false],
+  ])("%s -> %s", (prop, expected) => {
     expect(isContainerProp(prop)).toBe(expected);
   });
 });
 
-describe('isContainerAtRuleName', () => {
+describe("isContainerAtRuleName", () => {
   test.each([
-    ['container', true],
-    ['Container', true],
-    ['media', false],
-  ])('%s -> %s', (name, expected) => {
+    ["container", true],
+    ["Container", true],
+    ["media", false],
+  ])("%s -> %s", (name, expected) => {
     expect(isContainerAtRuleName(name)).toBe(expected);
   });
 });
 
-describe('parseContainerNameProp', () => {
-  test('extracts tokens from container-name declaration', () => {
-    const decl = fakeDeclaration('.a_1 { container-name: foo }');
+describe("parseContainerNameProp", () => {
+  test("extracts tokens from container-name declaration", () => {
+    const decl = fakeDeclaration(".a_1 { container-name: foo }");
     expect(parseContainerNameProp(decl)).toMatchInlineSnapshot(`
       [
         {
@@ -77,9 +77,10 @@ describe('parseContainerNameProp', () => {
     `);
   });
 
-  test('extracts multiple tokens from space-separated container-name', () => {
-    const decl = fakeDeclaration('.a_1 { container-name: foo bar }');
-    expect(parseContainerNameProp(decl).map((token) => token.name)).toMatchInlineSnapshot(`
+  test("extracts multiple tokens from space-separated container-name", () => {
+    const decl = fakeDeclaration(".a_1 { container-name: foo bar }");
+    expect(parseContainerNameProp(decl).map((token) => token.name))
+      .toMatchInlineSnapshot(`
       [
         "foo",
         "bar",
@@ -87,23 +88,24 @@ describe('parseContainerNameProp', () => {
     `);
   });
 
-  test('omits reserved keywords from container-name', () => {
+  test("omits reserved keywords from container-name", () => {
     const decl = fakeDeclaration(
-      '.a_1 { container-name: none and not or inherit initial unset revert revert-layer default NONE }',
+      ".a_1 { container-name: none and not or inherit initial unset revert revert-layer default NONE }",
     );
     expect(parseContainerNameProp(decl)).toMatchInlineSnapshot(`[]`);
   });
 
-  test('omits non-ident words from container-name', () => {
-    const decl = fakeDeclaration('.a_1 { container-name: 1foo }');
+  test("omits non-ident words from container-name", () => {
+    const decl = fakeDeclaration(".a_1 { container-name: 1foo }");
     expect(parseContainerNameProp(decl)).toMatchInlineSnapshot(`[]`);
   });
 });
 
-describe('parseContainerProp', () => {
-  test('extracts tokens before the slash from container shorthand', () => {
-    const decl = fakeDeclaration('.a_1 { container: foo bar / inline-size }');
-    expect(parseContainerProp(decl).map((token) => token.name)).toMatchInlineSnapshot(`
+describe("parseContainerProp", () => {
+  test("extracts tokens before the slash from container shorthand", () => {
+    const decl = fakeDeclaration(".a_1 { container: foo bar / inline-size }");
+    expect(parseContainerProp(decl).map((token) => token.name))
+      .toMatchInlineSnapshot(`
       [
         "foo",
         "bar",
@@ -111,9 +113,10 @@ describe('parseContainerProp', () => {
     `);
   });
 
-  test('extracts tokens from container shorthand without a container-type', () => {
-    const decl = fakeDeclaration('.a_1 { container: foo bar }');
-    expect(parseContainerProp(decl).map((token) => token.name)).toMatchInlineSnapshot(`
+  test("extracts tokens from container shorthand without a container-type", () => {
+    const decl = fakeDeclaration(".a_1 { container: foo bar }");
+    expect(parseContainerProp(decl).map((token) => token.name))
+      .toMatchInlineSnapshot(`
       [
         "foo",
         "bar",
@@ -122,9 +125,9 @@ describe('parseContainerProp', () => {
   });
 });
 
-describe('parseContainerAtRule', () => {
-  test('extracts a token reference from @container prelude', () => {
-    const atRule = fakeAtRule('@container foo (width > 400px) {}');
+describe("parseContainerAtRule", () => {
+  test("extracts a token reference from @container prelude", () => {
+    const atRule = fakeAtRule("@container foo (width > 400px) {}");
     expect(parseContainerAtRule(atRule)).toMatchInlineSnapshot(`
       {
         "loc": {
@@ -145,13 +148,13 @@ describe('parseContainerAtRule', () => {
     `);
   });
 
-  test('omits reference when @container prelude has no name', () => {
-    const atRule = fakeAtRule('@container (width > 400px) {}');
+  test("omits reference when @container prelude has no name", () => {
+    const atRule = fakeAtRule("@container (width > 400px) {}");
     expect(parseContainerAtRule(atRule)).toBeUndefined();
   });
 
-  test('omits reference when @container prelude starts with a reserved keyword', () => {
-    const atRule = fakeAtRule('@container not (width > 400px) {}');
+  test("omits reference when @container prelude starts with a reserved keyword", () => {
+    const atRule = fakeAtRule("@container not (width > 400px) {}");
     expect(parseContainerAtRule(atRule)).toBeUndefined();
   });
 });

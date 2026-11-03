@@ -1,5 +1,5 @@
-import type { AtRule } from 'postcss';
-import type { DiagnosticWithDetachedLocation, Location } from '../type.js';
+import type { AtRule } from "postcss";
+import type { DiagnosticWithDetachedLocation, Location } from "../type.js";
 
 interface KeyframeDeclaration {
   name: string;
@@ -25,31 +25,40 @@ interface ParseAtKeyframesResult {
  * @param atKeyframes The @keyframes at-rule to parse
  * @returns Parsed keyframe information and diagnostics
  */
-export function parseKeyframesAtRule(atKeyframes: AtRule): ParseAtKeyframesResult {
+export function parseKeyframesAtRule(
+  atKeyframes: AtRule,
+): ParseAtKeyframesResult {
   const keyframeName = atKeyframes.params;
 
-  if (keyframeName === '') {
+  if (keyframeName === "") {
     return { diagnostics: [] };
   }
 
   const keyframeNameLoc = {
-    start: atKeyframes.positionBy({ index: `@keyframes${atKeyframes.raws.afterName!}`.length }),
-    end: atKeyframes.positionBy({ index: `@keyframes${atKeyframes.raws.afterName!}${keyframeName}`.length }),
+    start: atKeyframes.positionBy({
+      index: `@keyframes${atKeyframes.raws.afterName!}`.length,
+    }),
+    end: atKeyframes.positionBy({
+      index: `@keyframes${atKeyframes.raws.afterName!}${keyframeName}`.length,
+    }),
   };
 
-  if (keyframeName.startsWith(':local(') && keyframeName.endsWith(')')) {
+  if (keyframeName.startsWith(":local(") && keyframeName.endsWith(")")) {
     // For simplicity of implementation, css-modules-kit does not support `:local(...)`.
     return {
       diagnostics: [
         {
-          category: 'error',
+          category: "error",
           start: keyframeNameLoc.start,
           length: keyframeName.length,
           text: `css-modules-kit does not support \`:local()\` wrapper for keyframes. Use \`@keyframes ${keyframeName} {...}\` instead.`,
         },
       ],
     };
-  } else if (keyframeName.startsWith(':global(') && keyframeName.endsWith(')')) {
+  } else if (
+    keyframeName.startsWith(":global(") &&
+    keyframeName.endsWith(")")
+  ) {
     return { diagnostics: [] };
   }
 

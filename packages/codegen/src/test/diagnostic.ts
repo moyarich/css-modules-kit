@@ -1,12 +1,12 @@
-import type { Diagnostic } from '@css-modules-kit/core';
+import type { Diagnostic } from "@css-modules-kit/core";
 
 function formatDiagnostic(diagnostic: Diagnostic, rootDir: string) {
   return {
-    text: diagnostic.text.replace(rootDir, '<rootDir>'),
+    text: diagnostic.text.replace(rootDir, "<rootDir>"),
     category: diagnostic.category,
-    ...('file' in diagnostic
+    ...("file" in diagnostic
       ? {
-          fileName: diagnostic.file.fileName.replace(rootDir, '<rootDir>'),
+          fileName: diagnostic.file.fileName.replace(rootDir, "<rootDir>"),
           start: diagnostic.start,
           length: diagnostic.length,
         }

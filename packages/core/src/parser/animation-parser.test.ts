@@ -1,31 +1,31 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeDeclaration } from '../test/ast.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import { fakeDeclaration } from "../test/ast.js";
 import {
   isAnimationNameProp,
   isAnimationProp,
   parseAnimationNameProp,
   parseAnimationProp,
-} from './animation-parser.js';
+} from "./animation-parser.js";
 
-describe('isAnimationNameProp', () => {
+describe("isAnimationNameProp", () => {
   test.each([
-    ['animation-name', true],
-    ['-webkit-animation-name', true],
-    ['-moz-animation-name', true],
-    ['-o-animation-name', true],
-    ['-ms-animation-name', true],
-    ['Animation-Name', true],
-    ['animation', false],
-    ['color', false],
-  ])('%s -> %s', (prop, expected) => {
+    ["animation-name", true],
+    ["-webkit-animation-name", true],
+    ["-moz-animation-name", true],
+    ["-o-animation-name", true],
+    ["-ms-animation-name", true],
+    ["Animation-Name", true],
+    ["animation", false],
+    ["color", false],
+  ])("%s -> %s", (prop, expected) => {
     expect(isAnimationNameProp(prop)).toBe(expected);
   });
 });
 
-describe('parseAnimationNameProp', () => {
-  test('extracts a single ident', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: a_2 }');
+describe("parseAnimationNameProp", () => {
+  test("extracts a single ident", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: a_2 }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -51,8 +51,8 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('extracts comma-separated idents', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: a_2, a_3 }');
+  test("extracts comma-separated idents", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: a_2, a_3 }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -94,8 +94,8 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('extracts ident from local()', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: local(a_2) }');
+  test("extracts ident from local()", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: local(a_2) }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -121,8 +121,8 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('skips ident inside global()', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: global(a_2) }');
+  test("skips ident inside global()", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: global(a_2) }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
     	{
     	  "diagnostics": [],
@@ -131,8 +131,8 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('skips ident inside var()', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: var(--a_2) }');
+  test("skips ident inside var()", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: var(--a_2) }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
     	{
     	  "diagnostics": [],
@@ -141,8 +141,8 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('skips ident inside env()', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: env(a_2) }');
+  test("skips ident inside env()", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: env(a_2) }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
     	{
     	  "diagnostics": [],
@@ -151,8 +151,8 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('skips reserved keywords (none, revert, revert-layer)', () => {
-    const decl = fakeDeclaration('.a_1 { animation-name: revert, a_2, none }');
+  test("skips reserved keywords (none, revert, revert-layer)", () => {
+    const decl = fakeDeclaration(".a_1 { animation-name: revert, a_2, none }");
     expect(parseAnimationNameProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -178,7 +178,7 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('reports a diagnostic and skips references for invalid local() shapes (multiple idents, non-identifier node, empty)', () => {
+  test("reports a diagnostic and skips references for invalid local() shapes (multiple idents, non-identifier node, empty)", () => {
     const decl = fakeDeclaration(
       '.a_1 { animation-name: local(a_2, a_3), local(a_4, local(a_5)), local(), local("a_6") }',
     );
@@ -227,7 +227,7 @@ describe('parseAnimationNameProp', () => {
     `);
   });
 
-  test('handles references on lines after the declaration start', () => {
+  test("handles references on lines after the declaration start", () => {
     const decl = fakeDeclaration(dedent`
       .a_1 {
         animation-name:
@@ -288,24 +288,24 @@ describe('parseAnimationNameProp', () => {
   });
 });
 
-describe('isAnimationProp', () => {
+describe("isAnimationProp", () => {
   test.each([
-    ['animation', true],
-    ['-webkit-animation', true],
-    ['-moz-animation', true],
-    ['-o-animation', true],
-    ['-ms-animation', true],
-    ['Animation', true],
-    ['animation-name', false],
-    ['color', false],
-  ])('%s -> %s', (prop, expected) => {
+    ["animation", true],
+    ["-webkit-animation", true],
+    ["-moz-animation", true],
+    ["-o-animation", true],
+    ["-ms-animation", true],
+    ["Animation", true],
+    ["animation-name", false],
+    ["color", false],
+  ])("%s -> %s", (prop, expected) => {
     expect(isAnimationProp(prop)).toBe(expected);
   });
 });
 
-describe('parseAnimationProp', () => {
-  test('extracts a keyframes name and skips times and longhand keywords', () => {
-    const decl = fakeDeclaration('.a_1 { animation: a_2 1s linear infinite }');
+describe("parseAnimationProp", () => {
+  test("extracts a keyframes name and skips times and longhand keywords", () => {
+    const decl = fakeDeclaration(".a_1 { animation: a_2 1s linear infinite }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -333,8 +333,8 @@ describe('parseAnimationProp', () => {
 
   // `auto` is reserved (animation-duration/timeline) and is skipped. This differs from css-loader,
   // which does not know `auto` and treats it as a `<keyframes-name>`.
-  test('extracts a dashed-ident name and skips auto and numbers', () => {
-    const decl = fakeDeclaration('.a_1 { animation: a_2 auto --foo 2 }');
+  test("extracts a dashed-ident name and skips auto and numbers", () => {
+    const decl = fakeDeclaration(".a_1 { animation: a_2 auto --foo 2 }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -376,8 +376,8 @@ describe('parseAnimationProp', () => {
     `);
   });
 
-  test('extracts a name from each comma-separated segment', () => {
-    const decl = fakeDeclaration('.a_1 { animation: 1s a_2, 2s linear a_3 }');
+  test("extracts a name from each comma-separated segment", () => {
+    const decl = fakeDeclaration(".a_1 { animation: 1s a_2, 2s linear a_3 }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -421,8 +421,8 @@ describe('parseAnimationProp', () => {
 
   // Per the CSS spec this declaration is invalid because a segment has a single `<keyframes-name>` slot,
   // but for simplicity—and to match css-loader—every custom-ident is extracted.
-  test('extracts every custom-ident in a comma-less segment', () => {
-    const decl = fakeDeclaration('.a_1 { animation: a_2 a_3 }');
+  test("extracts every custom-ident in a comma-less segment", () => {
+    const decl = fakeDeclaration(".a_1 { animation: a_2 a_3 }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -466,8 +466,8 @@ describe('parseAnimationProp', () => {
 
   // css-loader counts keyword occurrences and treats a repeated keyword as a name (the 2nd `infinite`).
   // We do not count occurrences, so every reserved keyword is always skipped.
-  test('skips repeated reserved keywords without occurrence counting', () => {
-    const decl = fakeDeclaration('.a_1 { animation: infinite infinite }');
+  test("skips repeated reserved keywords without occurrence counting", () => {
+    const decl = fakeDeclaration(".a_1 { animation: infinite infinite }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -476,8 +476,8 @@ describe('parseAnimationProp', () => {
     `);
   });
 
-  test('skips none', () => {
-    const decl = fakeDeclaration('.a_1 { animation: none }');
+  test("skips none", () => {
+    const decl = fakeDeclaration(".a_1 { animation: none }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -486,8 +486,10 @@ describe('parseAnimationProp', () => {
     `);
   });
 
-  test('extracts ident from local() and skips global() and var()', () => {
-    const decl = fakeDeclaration('.a_1 { animation: local(a_2), global(a_3), var(--a_4) a_5 }');
+  test("extracts ident from local() and skips global() and var()", () => {
+    const decl = fakeDeclaration(
+      ".a_1 { animation: local(a_2), global(a_3), var(--a_4) a_5 }",
+    );
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [],
@@ -529,8 +531,8 @@ describe('parseAnimationProp', () => {
     `);
   });
 
-  test('reports a diagnostic and skips references for invalid local() shapes', () => {
-    const decl = fakeDeclaration('.a_1 { animation: local(a_2, a_3) }');
+  test("reports a diagnostic and skips references for invalid local() shapes", () => {
+    const decl = fakeDeclaration(".a_1 { animation: local(a_2, a_3) }");
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {
         "diagnostics": [
@@ -550,7 +552,7 @@ describe('parseAnimationProp', () => {
   });
 
   // The CSS spec allows `<string>` as a `<keyframes-name>`, but it is intentionally not detected, matching css-loader.
-  test('skips string-form keyframes names', () => {
+  test("skips string-form keyframes names", () => {
     const decl = fakeDeclaration('.a_1 { animation: "a_2" a_3 }');
     expect(parseAnimationProp(decl)).toMatchInlineSnapshot(`
       {

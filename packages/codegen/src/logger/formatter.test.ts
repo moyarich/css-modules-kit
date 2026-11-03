@@ -1,11 +1,11 @@
-import dedent from 'dedent';
-import ts from 'typescript';
-import { describe, expect, test } from 'vite-plus/test';
-import { formatDiagnostics, formatTime } from './formatter.js';
+import dedent from "dedent";
+import ts from "typescript";
+import { describe, expect, test } from "vite-plus/test";
+import { formatDiagnostics, formatTime } from "./formatter.js";
 
-describe('formatDiagnostics', () => {
+describe("formatDiagnostics", () => {
   const file = ts.createSourceFile(
-    '/app/test.module.css',
+    "/app/test.module.css",
     dedent`
       .a_1 { color: red; }
       .a_2 { color: red; }
@@ -15,16 +15,16 @@ describe('formatDiagnostics', () => {
     ts.ScriptKind.Unknown,
   );
   const host: ts.FormatDiagnosticsHost = {
-    getCurrentDirectory: () => '/app',
+    getCurrentDirectory: () => "/app",
     getCanonicalFileName: (fileName) => fileName,
-    getNewLine: () => '\n',
+    getNewLine: () => "\n",
   };
   const diagnostics: ts.Diagnostic[] = [
     {
       file,
       start: 1,
       length: 3,
-      messageText: '`a_1` is not allowed',
+      messageText: "`a_1` is not allowed",
       category: ts.DiagnosticCategory.Error,
       code: 0,
     },
@@ -32,13 +32,13 @@ describe('formatDiagnostics', () => {
       file,
       start: 22,
       length: 3,
-      messageText: '`a_2` is not allowed',
+      messageText: "`a_2` is not allowed",
       category: ts.DiagnosticCategory.Error,
       code: 0,
     },
   ];
 
-  test('formats diagnostics with color and context when pretty is true', () => {
+  test("formats diagnostics with color and context when pretty is true", () => {
     const result = formatDiagnostics(diagnostics, host, true);
     expect(result).toMatchInlineSnapshot(`
       "[96mtest.module.css[0m:[93m1[0m:[93m2[0m - [91merror[0m[90m: [0m\`a_1\` is not allowed
@@ -55,7 +55,7 @@ describe('formatDiagnostics', () => {
     `);
   });
 
-  test('formats diagnostics without color and context when pretty is false', () => {
+  test("formats diagnostics without color and context when pretty is false", () => {
     const result = formatDiagnostics(diagnostics, host, false);
     expect(result).toMatchInlineSnapshot(`
       "test.module.css(1,2): error: \`a_1\` is not allowed
@@ -67,8 +67,8 @@ describe('formatDiagnostics', () => {
   });
 });
 
-test('formatTime', () => {
-  const date = new Date('2023-01-01T00:00:00Z');
+test("formatTime", () => {
+  const date = new Date("2023-01-01T00:00:00Z");
   expect(formatTime(date, true)).toMatchInlineSnapshot(`
     "[[90m12:00:00 AM[0m]"
   `);

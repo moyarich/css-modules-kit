@@ -1,4 +1,10 @@
-import type { CSSModule, ExportBuilder, ExportRecord, MatchesPattern, Resolver } from './type.js';
+import type {
+  CSSModule,
+  ExportBuilder,
+  ExportRecord,
+  MatchesPattern,
+  Resolver,
+} from "./type.js";
 
 export interface ExportBuilderHost {
   matchesPattern: MatchesPattern;
@@ -21,16 +27,20 @@ export function createExportBuilder(host: ExportBuilderHost): ExportBuilder {
     // when the module graph has circular dependencies.
     cache.set(cssModule.fileName, { allTokens: [] });
 
-    const result: ExportRecord = { allTokens: cssModule.localTokens.map((t) => t.name) };
+    const result: ExportRecord = {
+      allTokens: cssModule.localTokens.map((t) => t.name),
+    };
 
     for (const tokenImporter of cssModule.tokenImporters) {
-      const from = host.resolver(tokenImporter.from, { request: cssModule.fileName });
+      const from = host.resolver(tokenImporter.from, {
+        request: cssModule.fileName,
+      });
       if (!from || !host.matchesPattern(from)) continue;
       const imported = host.getCSSModule(from);
       if (!imported) continue;
 
       const importedResult = build(imported);
-      if (tokenImporter.type === 'all') {
+      if (tokenImporter.type === "all") {
         result.allTokens.push(...importedResult.allTokens);
       } else {
         for (const entry of tokenImporter.entries) {

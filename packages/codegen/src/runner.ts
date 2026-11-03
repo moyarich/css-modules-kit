@@ -1,16 +1,16 @@
-import type { Stats } from 'node:fs';
-import { rm } from 'node:fs/promises';
-import { basename } from '@css-modules-kit/core';
-import chokidar, { type FSWatcher } from 'chokidar';
-import { CMKDisabledError } from './error.js';
-import type { Logger } from './logger/logger.js';
-import { createProject, type Project } from './project.js';
+import type { Stats } from "node:fs";
+import { rm } from "node:fs/promises";
+import { basename } from "@css-modules-kit/core";
+import chokidar, { type FSWatcher } from "chokidar";
+import { CMKDisabledError } from "./error.js";
+import type { Logger } from "./logger/logger.js";
+import { createProject, type Project } from "./project.js";
 
 // The CSS Modules Kit also ignores the minimum set of directories that TypeScript typically ignores.
 // ref: https://github.com/microsoft/TypeScript/blob/87aa917befa8f6182f5535df3c77287209692a04/src/compiler/sys.ts#L562
 // ref: https://github.com/microsoft/TypeScript/blob/caf1aee269d1660b4d2a8b555c2d602c97cb28d7/src/compiler/utilities.ts#L9506
 // ref: https://github.com/mizdra/css-modules-kit/issues/321
-const ignoredDirname: readonly string[] = ['node_modules', '.git'];
+const ignoredDirname: readonly string[] = ["node_modules", ".git"];
 
 interface RunnerArgs {
   project: string;
@@ -32,7 +32,10 @@ export interface Watcher {
  * @throws {WriteDtsFileError}
  * @returns Whether the process succeeded without errors.
  */
-export async function runCMK(args: RunnerArgs, logger: Logger): Promise<boolean> {
+export async function runCMK(
+  args: RunnerArgs,
+  logger: Logger,
+): Promise<boolean> {
   const project = createProject(args);
   if (!project.config.enabled) {
     throw new CMKDisabledError(project.config);
@@ -44,7 +47,7 @@ export async function runCMK(args: RunnerArgs, logger: Logger): Promise<boolean>
   const diagnostics = project.getDiagnostics();
   if (diagnostics.length > 0) {
     logger.logDiagnostics(diagnostics);
-    const hasErrors = diagnostics.some((d) => d.category === 'error');
+    const hasErrors = diagnostics.some((d) => d.category === "error");
     return !hasErrors;
   }
   return true;
@@ -63,7 +66,10 @@ export async function runCMK(args: RunnerArgs, logger: Logger): Promise<boolean>
  * @throws {ReadCSSModuleFileError}
  * @throws {WriteDtsFileError}
  */
-export async function runCMKInWatchMode(args: RunnerArgs, logger: Logger): Promise<Watcher> {
+export async function runCMKInWatchMode(
+  args: RunnerArgs,
+  logger: Logger,
+): Promise<Watcher> {
   const fsWatchers: FSWatcher[] = [];
   const project = createProject(args);
   if (!project.config.enabled) {
@@ -104,7 +110,7 @@ export async function runCMKInWatchMode(args: RunnerArgs, logger: Logger): Promi
           ignoreInitial: true,
           ...(wildcardDirectory.recursive ? {} : { depth: 0 }),
         })
-        .on('add', (fileName) => {
+        .on("add", (fileName) => {
           try {
             project.addFile(fileName);
           } catch (e) {
@@ -113,7 +119,7 @@ export async function runCMKInWatchMode(args: RunnerArgs, logger: Logger): Promi
           }
           scheduleEmitAndReportDiagnostics();
         })
-        .on('change', (fileName) => {
+        .on("change", (fileName) => {
           try {
             project.updateFile(fileName);
           } catch (e) {
@@ -122,12 +128,12 @@ export async function runCMKInWatchMode(args: RunnerArgs, logger: Logger): Promi
           }
           scheduleEmitAndReportDiagnostics();
         })
-        .on('unlink', (fileName: string) => {
+        .on("unlink", (fileName: string) => {
           project.removeFile(fileName);
           scheduleEmitAndReportDiagnostics();
         })
-        .on('error', (e) => logger.logError(e))
-        .on('ready', () => resolve()),
+        .on("error", (e) => logger.logError(e))
+        .on("ready", () => resolve()),
     );
   }
   await Promise.all(readyPromises);
@@ -137,7 +143,8 @@ export async function runCMKInWatchMode(args: RunnerArgs, logger: Logger): Promi
     // Reporting diagnostics for each file change would overwhelm users.
     // Therefore, we batch the processing.
 
-    if (emitAndReportDiagnosticsTimer !== undefined) clearTimeout(emitAndReportDiagnosticsTimer);
+    if (emitAndReportDiagnosticsTimer !== undefined)
+      clearTimeout(emitAndReportDiagnosticsTimer);
 
     emitAndReportDiagnosticsTimer = setTimeout(() => {
       emitAndReportDiagnosticsTimer = undefined;
@@ -157,15 +164,20 @@ export async function runCMKInWatchMode(args: RunnerArgs, logger: Logger): Promi
     if (diagnostics.length > 0) {
       logger.logDiagnostics(diagnostics);
     }
-    const errorCount = diagnostics.filter((d) => d.category === 'error').length;
-    const warningCount = diagnostics.filter((d) => d.category === 'warning').length;
-    const warningPart = warningCount > 0 ? ` and ${warningCount} warning${warningCount === 1 ? '' : 's'}` : '';
+    const errorCount = diagnostics.filter((d) => d.category === "error").length;
+    const warningCount = diagnostics.filter(
+      (d) => d.category === "warning",
+    ).length;
+    const warningPart =
+      warningCount > 0
+        ? ` and ${warningCount} warning${warningCount === 1 ? "" : "s"}`
+        : "";
     logger.logMessage(
-      `Found ${errorCount} error${errorCount === 1 ? '' : 's'}${warningPart}. Watching for file changes.`,
+      `Found ${errorCount} error${errorCount === 1 ? "" : "s"}${warningPart}. Watching for file changes.`,
       { time: true },
     );
     if (args.preserveWatchOutput) {
-      logger.logMessage('');
+      logger.logMessage("");
     }
   }
 

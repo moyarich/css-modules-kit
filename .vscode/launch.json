@@ -215,7 +215,10 @@
   "compounds": [
     {
       "name": "vscode (1-basic)",
-      "configurations": ["vscode (1-basic) - extensionHost", "Attach debugger to tsserver"],
+      "configurations": [
+        "vscode (1-basic) - extensionHost",
+        "Attach debugger to tsserver"
+      ],
       "stopAll": true,
       "presentation": {
         "group": "vscode"
@@ -223,7 +226,10 @@
     },
     {
       "name": "vscode (2-named-exports)",
-      "configurations": ["vscode (2-named-exports) - extensionHost", "Attach debugger to tsserver"],
+      "configurations": [
+        "vscode (2-named-exports) - extensionHost",
+        "Attach debugger to tsserver"
+      ],
       "stopAll": true,
       "presentation": {
         "group": "vscode"
@@ -231,7 +237,10 @@
     },
     {
       "name": "vscode (3-import-alias)",
-      "configurations": ["vscode (3-import-alias) - extensionHost", "Attach debugger to tsserver"],
+      "configurations": [
+        "vscode (3-import-alias) - extensionHost",
+        "Attach debugger to tsserver"
+      ],
       "stopAll": true,
       "presentation": {
         "group": "vscode"
@@ -239,7 +248,10 @@
     },
     {
       "name": "vscode (4-multiple-tsconfig)",
-      "configurations": ["vscode (4-multiple-tsconfig) - extensionHost", "Attach debugger to tsserver"],
+      "configurations": [
+        "vscode (4-multiple-tsconfig) - extensionHost",
+        "Attach debugger to tsserver"
+      ],
       "stopAll": true,
       "presentation": {
         "group": "vscode"
@@ -247,7 +259,10 @@
     },
     {
       "name": "vscode (5-normal-css)",
-      "configurations": ["vscode (5-normal-css) - extensionHost", "Attach debugger to tsserver"],
+      "configurations": [
+        "vscode (5-normal-css) - extensionHost",
+        "Attach debugger to tsserver"
+      ],
       "stopAll": true,
       "presentation": {
         "group": "vscode"
@@ -255,7 +270,10 @@
     },
     {
       "name": "vscode (6-project-external-file)",
-      "configurations": ["vscode (6-project-external-file) - extensionHost", "Attach debugger to tsserver"],
+      "configurations": [
+        "vscode (6-project-external-file) - extensionHost",
+        "Attach debugger to tsserver"
+      ],
       "stopAll": true,
       "presentation": {
         "group": "vscode"

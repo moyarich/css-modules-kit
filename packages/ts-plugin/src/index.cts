@@ -1,22 +1,28 @@
-import type { CMKConfig } from '@css-modules-kit/core';
-import { createMatchesPattern, createResolver, readConfigFile } from '@css-modules-kit/core';
-import { TsConfigFileNotFoundError } from '@css-modules-kit/core';
-import type { Language } from '@volar/language-core';
-import { createLanguageServicePlugin } from '@volar/typescript/lib/quickstart/createLanguageServicePlugin.js';
-import type ts from 'typescript';
-import { createCSSLanguagePlugin } from './language-plugin.js';
-import { proxyLanguageService } from './language-service/proxy.js';
-import { createDocumentLinkHandler } from './protocol-handler/documentLink.js';
-import { createGetEditsForFileRenameHandler } from './protocol-handler/getEditsForFileRename.js';
-import { createRenameHandler } from './protocol-handler/rename.js';
-import { createRenameInfoHandler } from './protocol-handler/renameInfo.js';
-import { CustomSourceMap } from './source-map.js';
+import type { CMKConfig } from "@css-modules-kit/core";
+import {
+  createMatchesPattern,
+  createResolver,
+  readConfigFile,
+} from "@css-modules-kit/core";
+import { TsConfigFileNotFoundError } from "@css-modules-kit/core";
+import type { Language } from "@volar/language-core";
+import { createLanguageServicePlugin } from "@volar/typescript/lib/quickstart/createLanguageServicePlugin.js";
+import type ts from "typescript";
+import { createCSSLanguagePlugin } from "./language-plugin.js";
+import { proxyLanguageService } from "./language-service/proxy.js";
+import { createDocumentLinkHandler } from "./protocol-handler/documentLink.js";
+import { createGetEditsForFileRenameHandler } from "./protocol-handler/getEditsForFileRename.js";
+import { createRenameHandler } from "./protocol-handler/rename.js";
+import { createRenameInfoHandler } from "./protocol-handler/renameInfo.js";
+import { CustomSourceMap } from "./source-map.js";
 
 const projectToLanguage = new WeakMap<ts.server.Project, Language<string>>();
 
 const plugin = createLanguageServicePlugin((ts, info) => {
   if (info.project.projectKind !== ts.server.ProjectKind.Configured) {
-    info.project.projectService.logger.info(`[@css-modules-kit/ts-plugin] info: Project is not configured`);
+    info.project.projectService.logger.info(
+      `[@css-modules-kit/ts-plugin] info: Project is not configured`,
+    );
     return { languagePlugins: [] };
   }
 
@@ -49,12 +55,15 @@ const plugin = createLanguageServicePlugin((ts, info) => {
   // tsserver should report a "Cannot find module" error for import statements in CSS Modules that
   // do not exist. However, if `dtsOutDir` is included in `rootDirs` and old .d.ts files remain
   // in `dtsOutDir`, the error will not be reported. Therefore, remove `dtsOutDir` from `rootDirs`.
-  const getCompilationSettings = info.languageServiceHost.getCompilationSettings.bind(info.languageServiceHost);
+  const getCompilationSettings =
+    info.languageServiceHost.getCompilationSettings.bind(
+      info.languageServiceHost,
+    );
   info.languageServiceHost.getCompilationSettings = () => {
     const settings = getCompilationSettings();
     return new Proxy(settings, {
       get(target, prop, receiver) {
-        if (prop === 'rootDirs' && target.rootDirs) {
+        if (prop === "rootDirs" && target.rootDirs) {
           return target.rootDirs.filter((dir) => dir !== config.dtsOutDir);
         }
         return Reflect.get(target, prop, receiver);
@@ -62,8 +71,12 @@ const plugin = createLanguageServicePlugin((ts, info) => {
     });
   };
 
-  const moduleResolutionCache = info.languageServiceHost.getModuleResolutionCache?.();
-  const resolver = createResolver(config.compilerOptions, moduleResolutionCache);
+  const moduleResolutionCache =
+    info.languageServiceHost.getModuleResolutionCache?.();
+  const resolver = createResolver(
+    config.compilerOptions,
+    moduleResolutionCache,
+  );
   const matchesPattern = createMatchesPattern(config);
 
   return {
@@ -94,18 +107,25 @@ const plugin = createLanguageServicePlugin((ts, info) => {
         // - Implement the handler to handle files from different projects
         // - Skip registration if the handler is already registered
         try {
-          info.session.addProtocolHandler('_css-modules-kit:rename', createRenameHandler(info.project.projectService));
           info.session.addProtocolHandler(
-            '_css-modules-kit:renameInfo',
+            "_css-modules-kit:rename",
+            createRenameHandler(info.project.projectService),
+          );
+          info.session.addProtocolHandler(
+            "_css-modules-kit:renameInfo",
             createRenameInfoHandler(info.project.projectService),
           );
           info.session.addProtocolHandler(
-            '_css-modules-kit:getEditsForFileRename',
+            "_css-modules-kit:getEditsForFileRename",
             createGetEditsForFileRenameHandler(info.project.projectService),
           );
           info.session.addProtocolHandler(
-            '_css-modules-kit:documentLink',
-            createDocumentLinkHandler(info.project.projectService, projectToLanguage, resolver),
+            "_css-modules-kit:documentLink",
+            createDocumentLinkHandler(
+              info.project.projectService,
+              projectToLanguage,
+              resolver,
+            ),
           );
         } catch {
           info.project.projectService.logger.info(
@@ -116,7 +136,7 @@ const plugin = createLanguageServicePlugin((ts, info) => {
         // When a plugin is used via tsserver from the editor, the session is always available.
         // However, when a plugin is used via the TypeScript Compiler API, the session may not be available.
         info.project.projectService.logger.info(
-          '[@css-modules-kit/ts-plugin] info: Skipping protocol handler registration because session is not available.',
+          "[@css-modules-kit/ts-plugin] info: Skipping protocol handler registration because session is not available.",
         );
       }
     },

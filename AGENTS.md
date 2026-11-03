@@ -72,7 +72,7 @@ After updating, commit the example changes separately with `chore(examples): ...
 class AuthError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'AuthError';
+    this.name = "AuthError";
   }
 }
 ```
@@ -88,7 +88,7 @@ class AuthError extends Error {
  */
 function myFunction() {
   if (!user.isAuthorized()) {
-    throw new AuthError('User is not authorized');
+    throw new AuthError("User is not authorized");
   }
 }
 ```

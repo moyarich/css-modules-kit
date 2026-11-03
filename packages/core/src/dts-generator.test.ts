@@ -1,9 +1,9 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { generateDts, type GenerateDtsOptions } from './dts-generator.js';
-import { readAndParseCSSModule } from './test/css-module.js';
-import { renderDtsResult } from './test/dts-mapping.js';
-import { createIFF } from './test/fixture.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import { generateDts, type GenerateDtsOptions } from "./dts-generator.js";
+import { readAndParseCSSModule } from "./test/css-module.js";
+import { renderDtsResult } from "./test/dts-mapping.js";
+import { createIFF } from "./test/fixture.js";
 
 const defaultExportOptions: GenerateDtsOptions = {
   namedExports: false,
@@ -17,16 +17,19 @@ const namedExportOptions: GenerateDtsOptions = {
   forTsPlugin: false,
 };
 
-async function run(source: string, options: GenerateDtsOptions): Promise<string> {
-  const iff = await createIFF({ 'a.module.css': source });
-  const cssModule = readAndParseCSSModule(iff.paths['a.module.css']);
-  if (cssModule === undefined) throw new Error('failed to parse CSS module');
+async function run(
+  source: string,
+  options: GenerateDtsOptions,
+): Promise<string> {
+  const iff = await createIFF({ "a.module.css": source });
+  const cssModule = readAndParseCSSModule(iff.paths["a.module.css"]);
+  if (cssModule === undefined) throw new Error("failed to parse CSS module");
   return renderDtsResult(source, generateDts(cssModule, options));
 }
 
-describe('generates an empty .d.ts file when the CSS module has no tokens', () => {
-  test('default export', async () => {
-    expect(await run('', defaultExportOptions)).toMatchInlineSnapshot(`
+describe("generates an empty .d.ts file when the CSS module has no tokens", () => {
+  test("default export", async () => {
+    expect(await run("", defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
 
 
@@ -38,8 +41,8 @@ describe('generates an empty .d.ts file when the CSS module has no tokens', () =
     	"
     `);
   });
-  test('named export', async () => {
-    expect(await run('', namedExportOptions)).toMatchInlineSnapshot(`
+  test("named export", async () => {
+    expect(await run("", namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
 
 
@@ -51,13 +54,13 @@ describe('generates an empty .d.ts file when the CSS module has no tokens', () =
   });
 });
 
-describe('creates an entry for each local token declaration', () => {
+describe("creates an entry for each local token declaration", () => {
   const source = dedent`
     .a_1 { color: red; }
     .a_2 { color: red; }
     .a_2 { color: red; }
   `;
-  test('default export', async () => {
+  test("default export", async () => {
     expect(await run(source, defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	.a_1 { color: red; }
@@ -81,7 +84,7 @@ describe('creates an entry for each local token declaration', () => {
     	"
     `);
   });
-  test('named export', async () => {
+  test("named export", async () => {
     expect(await run(source, namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	.a_1 { color: red; }
@@ -110,13 +113,13 @@ describe('creates an entry for each local token declaration', () => {
   });
 });
 
-describe('re-exports tokens from an all token importer', () => {
+describe("re-exports tokens from an all token importer", () => {
   const source = dedent`
     @import './b.module.css';
     @import './c.module.css';
     @import './c.module.css';
   `;
-  test('default export', async () => {
+  test("default export", async () => {
     expect(await run(source, defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@import './b.module.css';
@@ -141,7 +144,7 @@ describe('re-exports tokens from an all token importer', () => {
     	"
     `);
   });
-  test('named export', async () => {
+  test("named export", async () => {
     expect(await run(source, namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@import './b.module.css';
@@ -164,13 +167,13 @@ describe('re-exports tokens from an all token importer', () => {
   });
 });
 
-describe('re-exports tokens from a named token importer', () => {
+describe("re-exports tokens from a named token importer", () => {
   const source = dedent`
     @value b_1, b_2 as b_alias from './b.module.css';
     @value c_1 from './c.module.css';
     @value c_1 from './c.module.css';
   `;
-  test('default export', async () => {
+  test("default export", async () => {
     expect(await run(source, defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@value b_1, b_2 as b_alias from './b.module.css';
@@ -213,7 +216,7 @@ describe('re-exports tokens from a named token importer', () => {
     	"
     `);
   });
-  test('named export', async () => {
+  test("named export", async () => {
     expect(await run(source, namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@value b_1, b_2 as b_alias from './b.module.css';
@@ -261,12 +264,12 @@ describe('re-exports tokens from a named token importer', () => {
   });
 });
 
-describe('omits token reference statements when forTsPlugin is false', () => {
+describe("omits token reference statements when forTsPlugin is false", () => {
   const source = dedent`
     @keyframes a_1 {}
     .a_2 { animation-name: a_1; }
   `;
-  test('default export', async () => {
+  test("default export", async () => {
     expect(await run(source, defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@keyframes a_1 {}
@@ -286,7 +289,7 @@ describe('omits token reference statements when forTsPlugin is false', () => {
     	"
     `);
   });
-  test('named export', async () => {
+  test("named export", async () => {
     expect(await run(source, namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@keyframes a_1 {}
@@ -311,13 +314,14 @@ describe('omits token reference statements when forTsPlugin is false', () => {
   });
 });
 
-describe('emits token reference statements when forTsPlugin is true', () => {
+describe("emits token reference statements when forTsPlugin is true", () => {
   const source = dedent`
     @keyframes a_1 {}
     .a_2 { animation-name: a_1; }
   `;
-  test('default export', async () => {
-    expect(await run(source, { ...defaultExportOptions, forTsPlugin: true })).toMatchInlineSnapshot(`
+  test("default export", async () => {
+    expect(await run(source, { ...defaultExportOptions, forTsPlugin: true }))
+      .toMatchInlineSnapshot(`
     	"=== source ===
     	@keyframes a_1 {}
     	           ^^^ mapping[0]
@@ -339,8 +343,9 @@ describe('emits token reference statements when forTsPlugin is true', () => {
     	"
     `);
   });
-  test('named export', async () => {
-    expect(await run(source, { ...namedExportOptions, forTsPlugin: true })).toMatchInlineSnapshot(`
+  test("named export", async () => {
+    expect(await run(source, { ...namedExportOptions, forTsPlugin: true }))
+      .toMatchInlineSnapshot(`
     	"=== source ===
     	@keyframes a_1 {}
     	           ^^^ mapping[0]
@@ -370,12 +375,13 @@ describe('emits token reference statements when forTsPlugin is true', () => {
   });
 });
 
-describe('emits external token reference statements when forTsPlugin is true', () => {
+describe("emits external token reference statements when forTsPlugin is true", () => {
   // `b_1` and `b_2` share one `from` clause. The `from` clause of `b_3` has the same specifier
   // as the first one, but is a separate clause.
   const source = `.a_1 { composes: b_1 b_2 from './b.module.css', b_3 from './b.module.css'; }`;
-  test('default export', async () => {
-    expect(await run(source, { ...defaultExportOptions, forTsPlugin: true })).toMatchInlineSnapshot(`
+  test("default export", async () => {
+    expect(await run(source, { ...defaultExportOptions, forTsPlugin: true }))
+      .toMatchInlineSnapshot(`
       "=== source ===
       .a_1 { composes: b_1 b_2 from './b.module.css', b_3 from './b.module.css'; }
                                                                ^^^^^^^^^^^^^^^^ mapping[4]
@@ -403,8 +409,9 @@ describe('emits external token reference statements when forTsPlugin is true', (
       "
     `);
   });
-  test('named export', async () => {
-    expect(await run(source, { ...namedExportOptions, forTsPlugin: true })).toMatchInlineSnapshot(`
+  test("named export", async () => {
+    expect(await run(source, { ...namedExportOptions, forTsPlugin: true }))
+      .toMatchInlineSnapshot(`
       "=== source ===
       .a_1 { composes: b_1 b_2 from './b.module.css', b_3 from './b.module.css'; }
                                                                ^^^^^^^^^^^^^^^^ mapping[4]
@@ -436,9 +443,10 @@ describe('emits external token reference statements when forTsPlugin is true', (
   });
 });
 
-test('omits external token reference statements whose specifier is a URL', async () => {
+test("omits external token reference statements whose specifier is a URL", async () => {
   const source = `.a_1 { composes: b_1 from 'https://example.com/b.module.css'; }`;
-  expect(await run(source, { ...defaultExportOptions, forTsPlugin: true })).toMatchInlineSnapshot(`
+  expect(await run(source, { ...defaultExportOptions, forTsPlugin: true }))
+    .toMatchInlineSnapshot(`
     "=== source ===
     .a_1 { composes: b_1 from 'https://example.com/b.module.css'; }
      ^^^ mapping[0]
@@ -454,12 +462,12 @@ test('omits external token reference statements whose specifier is a URL', async
   `);
 });
 
-describe('omits importers whose specifier is a URL', () => {
+describe("omits importers whose specifier is a URL", () => {
   const source = dedent`
     @import 'https://example.com/b.module.css';
     @value c_1 from 'https://example.com/c.module.css';
   `;
-  test('default export', async () => {
+  test("default export", async () => {
     expect(await run(source, defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@import 'https://example.com/b.module.css';
@@ -473,7 +481,7 @@ describe('omits importers whose specifier is a URL', () => {
     	"
     `);
   });
-  test('named export', async () => {
+  test("named export", async () => {
     expect(await run(source, namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	@import 'https://example.com/b.module.css';
@@ -487,13 +495,13 @@ describe('omits importers whose specifier is a URL', () => {
   });
 });
 
-describe('omits tokens whose name fails validateTokenName', () => {
+describe("omits tokens whose name fails validateTokenName", () => {
   const source = dedent`
     .__proto__ { color: red; }
     @value __proto__ from './b.module.css';
     @value b_1 as __proto__ from './b.module.css';
   `;
-  test('default export', async () => {
+  test("default export", async () => {
     expect(await run(source, defaultExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	.__proto__ { color: red; }
@@ -508,7 +516,7 @@ describe('omits tokens whose name fails validateTokenName', () => {
     	"
     `);
   });
-  test('named export', async () => {
+  test("named export", async () => {
     expect(await run(source, namedExportOptions)).toMatchInlineSnapshot(`
     	"=== source ===
     	.__proto__ { color: red; }
@@ -530,10 +538,15 @@ describe('omits tokens whose name fails validateTokenName', () => {
   });
 });
 
-test('appends a default styles export so completion suggestions show up when forTsPlugin and namedExports are on without prioritizeNamedImports', async () => {
+test("appends a default styles export so completion suggestions show up when forTsPlugin and namedExports are on without prioritizeNamedImports", async () => {
   const source = `.a_1 { color: red; }`;
-  expect(await run(source, { namedExports: true, prioritizeNamedImports: false, forTsPlugin: true }))
-    .toMatchInlineSnapshot(`
+  expect(
+    await run(source, {
+      namedExports: true,
+      prioritizeNamedImports: false,
+      forTsPlugin: true,
+    }),
+  ).toMatchInlineSnapshot(`
     	"=== source ===
     	.a_1 { color: red; }
     	 ^^^ mapping[0]
