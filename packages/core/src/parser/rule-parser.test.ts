@@ -1,21 +1,34 @@
-import dedent from 'dedent';
-import selectorParser from 'postcss-selector-parser';
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeRoot, fakeRules } from '../test/ast.js';
-import type { DiagnosticPosition } from '../type.js';
-import { calcDiagnosticsLocationForSelectorParserNodeForTest, parseRule } from './rule-parser.js';
+import dedent from "dedent";
+import selectorParser from "postcss-selector-parser";
+import { describe, expect, test } from "vite-plus/test";
+import { fakeRoot, fakeRules } from "../test/ast.js";
+import type { DiagnosticPosition } from "../type.js";
+import {
+  calcDiagnosticsLocationForSelectorParserNodeForTest,
+  parseRule,
+} from "./rule-parser.js";
 
 function parseRuleSimply(ruleStr: string): string[] {
   const [rule] = fakeRules(fakeRoot(ruleStr));
-  return parseRule(rule!).classSelectors.map((classSelector) => classSelector.name);
+  return parseRule(rule!).classSelectors.map(
+    (classSelector) => classSelector.name,
+  );
 }
 
 function calcLocations(source: string) {
   const [rule] = fakeRules(fakeRoot(source));
   const root = selectorParser().astSync(rule!);
-  const result: { node: string; type: string; start: DiagnosticPosition; length: number }[] = [];
+  const result: {
+    node: string;
+    type: string;
+    start: DiagnosticPosition;
+    length: number;
+  }[] = [];
   root.walk((node) => {
-    const loc = calcDiagnosticsLocationForSelectorParserNodeForTest(rule!, node);
+    const loc = calcDiagnosticsLocationForSelectorParserNodeForTest(
+      rule!,
+      node,
+    );
     result.push({
       node: node.toString(),
       type: node.type,
@@ -25,9 +38,9 @@ function calcLocations(source: string) {
   return result;
 }
 
-describe('calcDiagnosticsLocationForSelectorParserNode', () => {
-  test('single line', () => {
-    const result = calcLocations('.a .b {}');
+describe("calcDiagnosticsLocationForSelectorParserNode", () => {
+  test("single line", () => {
+    const result = calcLocations(".a .b {}");
     expect(result).toMatchInlineSnapshot(`
       [
         {
@@ -73,7 +86,7 @@ describe('calcDiagnosticsLocationForSelectorParserNode', () => {
       ]
     `);
   });
-  test('multiple line', () => {
+  test("multiple line", () => {
     const result1 = calcLocations(dedent`
       .a
       .b
@@ -201,8 +214,8 @@ describe('calcDiagnosticsLocationForSelectorParserNode', () => {
   });
 });
 
-describe('parseRule', () => {
-  test('collect local class selectors', () => {
+describe("parseRule", () => {
+  test("collect local class selectors", () => {
     const rules = fakeRules(
       fakeRoot(dedent`
         .basic {}
@@ -750,8 +763,8 @@ describe('parseRule', () => {
       ]
     `);
   });
-  test('collect class selectors containing special characters', () => {
-    const backslash = '\\';
+  test("collect class selectors containing special characters", () => {
+    const backslash = "\\";
     const rules = fakeRules(
       fakeRoot(
         // dedent package has an issue where `\\` is not escaped correctly. Therefore, we define the source code without using dedent.
@@ -918,19 +931,24 @@ describe('parseRule', () => {
       ]
     `);
   });
-  describe('`:local(...)` and `:global(...)`', () => {
-    test('The class names wrapped by `:global(...)` is global', () => {
-      expect(parseRuleSimply('.local1 :global(.global1 :is(.global2)) .local2 {}')).toStrictEqual(['local1', 'local2']);
+  describe("`:local(...)` and `:global(...)`", () => {
+    test("The class names wrapped by `:global(...)` is global", () => {
+      expect(
+        parseRuleSimply(".local1 :global(.global1 :is(.global2)) .local2 {}"),
+      ).toStrictEqual(["local1", "local2"]);
     });
-    test('The class names wrapped by `:local(...)` is local', () => {
-      expect(parseRuleSimply(':local(.local1 :is(.local2)) {}')).toStrictEqual(['local1', 'local2']);
+    test("The class names wrapped by `:local(...)` is local", () => {
+      expect(parseRuleSimply(":local(.local1 :is(.local2)) {}")).toStrictEqual([
+        "local1",
+        "local2",
+      ]);
       // If css-modules-kit supports `:local` and `:global`, the following test should pass.
       // expect(parseRuleSimply(':global .global1 :local(.local1 :is(.local2)) .global2 {}')).toStrictEqual([
       //   'local1',
       //   'local2',
       // ]);
     });
-    test('reports diagnostics when `:local(...)` or `:global(...)` is nested', () => {
+    test("reports diagnostics when `:local(...)` or `:global(...)` is nested", () => {
       const rules = fakeRules(
         fakeRoot(dedent`
           :local(:global(.a)) {}
@@ -1005,7 +1023,7 @@ describe('parseRule', () => {
         ]
       `);
     });
-    test('`:local()` and `:global()` is allowed', () => {
+    test("`:local()` and `:global()` is allowed", () => {
       // postcss-modules does not allow it, but css-modules-kit allows it.
       // Because allowing it does not harm users.
       const rules = fakeRules(
@@ -1034,9 +1052,9 @@ describe('parseRule', () => {
       `);
     });
   });
-  describe('`:local` and `:global`', () => {
+  describe("`:local` and `:global`", () => {
     // The :local and :global specifications are complex. Therefore, css-modules-kit does not support them.
-    test('reports diagnostics when using `:local` or `:global`', () => {
+    test("reports diagnostics when using `:local` or `:global`", () => {
       const rules = fakeRules(
         fakeRoot(dedent`
           :local .local1 {}

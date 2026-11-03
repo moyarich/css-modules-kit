@@ -3,23 +3,24 @@
  * This file tests the behavior of the Extension when a .css file is opened.
  */
 
-import * as assert from 'node:assert/strict';
-import { it } from 'mocha';
-import * as vscode from 'vscode';
-import { toObject, waitFor } from './util.js';
+import * as assert from "node:assert/strict";
+import { it } from "mocha";
+import * as vscode from "vscode";
+import { toObject, waitFor } from "./util.js";
 
 const workspaceRoot = vscode.workspace.workspaceFolders![0]!.uri;
-const aModuleCSSPath = vscode.Uri.joinPath(workspaceRoot, 'src/a.module.css');
-const aTSXPath = vscode.Uri.joinPath(workspaceRoot, 'src/a.tsx');
+const aModuleCSSPath = vscode.Uri.joinPath(workspaceRoot, "src/a.module.css");
+const aTSXPath = vscode.Uri.joinPath(workspaceRoot, "src/a.tsx");
 
-it('loads ts-plugin if .css file is opened', async () => {
-  const aModuleCSSDocument = await vscode.workspace.openTextDocument(aModuleCSSPath);
+it("loads ts-plugin if .css file is opened", async () => {
+  const aModuleCSSDocument =
+    await vscode.workspace.openTextDocument(aModuleCSSPath);
   await vscode.window.showTextDocument(aModuleCSSDocument);
 
   // Wait for the ts-plugin to be loaded and the definition provider to be registered
   const locations = await waitFor(async () => {
     const locations = await vscode.commands.executeCommand<vscode.Location[]>(
-      'vscode.executeReferenceProvider',
+      "vscode.executeReferenceProvider",
       aModuleCSSPath,
       new vscode.Position(0, 1), // `a_1`
     );

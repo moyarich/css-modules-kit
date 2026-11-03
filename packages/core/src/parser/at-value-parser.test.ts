@@ -1,10 +1,10 @@
-import dedent from 'dedent';
-import { describe, expect, test } from 'vite-plus/test';
-import { fakeAtValues, fakeRoot } from '../test/ast.js';
-import { parseValueAtRule } from './at-value-parser.js';
+import dedent from "dedent";
+import { describe, expect, test } from "vite-plus/test";
+import { fakeAtValues, fakeRoot } from "../test/ast.js";
+import { parseValueAtRule } from "./at-value-parser.js";
 
-describe('parseValueAtRule', () => {
-  test('parses syntax supported by css-loader', () => {
+describe("parseValueAtRule", () => {
+  test("parses syntax supported by css-loader", () => {
     const atValues = fakeAtValues(
       fakeRoot(dedent`
         @value basic: #000;
@@ -411,8 +411,10 @@ describe('parseValueAtRule', () => {
       ]
     `);
   });
-  test('matches the `from` and `as` keywords case-insensitively', () => {
-    const atValues = fakeAtValues(fakeRoot(`@value import1 AS alias1 FROM "test.css";`));
+  test("matches the `from` and `as` keywords case-insensitively", () => {
+    const atValues = fakeAtValues(
+      fakeRoot(`@value import1 AS alias1 FROM "test.css";`),
+    );
     const result = atValues.map(parseValueAtRule);
     expect(result).toMatchInlineSnapshot(`
       [
@@ -469,7 +471,7 @@ describe('parseValueAtRule', () => {
     `);
   });
 
-  test('parses syntax unsupported by css-loader', () => {
+  test("parses syntax unsupported by css-loader", () => {
     // NOTE: These syntaxes are not supported by css-loader, so css-modules-kit does not
     // guarantee any specific behavior for them. The snapshots below document how the current
     // implementation parses them rather than a behavior we commit to.

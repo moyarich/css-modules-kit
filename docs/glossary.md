@@ -8,7 +8,7 @@ For example, consider the following CSS file:
 
 ```css
 @value a_1: red;
-@import b_1, b_2 as b_2_alias from './b.module.css';
+@import b_1, b_2 as b_2_alias from "./b.module.css";
 .a_2 {
   color: red;
 }

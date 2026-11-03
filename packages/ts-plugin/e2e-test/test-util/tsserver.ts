@@ -1,47 +1,57 @@
-import serverHarness from '@typescript/server-harness';
-import type { server } from 'typescript';
-import ts from 'typescript';
+import serverHarness from "@typescript/server-harness";
+import type { server } from "typescript";
+import ts from "typescript";
 
 interface Tsserver {
-  sendUpdateOpen(args: server.protocol.UpdateOpenRequest['arguments']): Promise<server.protocol.Response>;
-  sendConfigure(args: server.protocol.ConfigureRequest['arguments']): Promise<server.protocol.ConfigureResponse>;
+  sendUpdateOpen(
+    args: server.protocol.UpdateOpenRequest["arguments"],
+  ): Promise<server.protocol.Response>;
+  sendConfigure(
+    args: server.protocol.ConfigureRequest["arguments"],
+  ): Promise<server.protocol.ConfigureResponse>;
   sendDefinitionAndBoundSpan(
     args: server.protocol.FileLocationRequestArgs,
   ): Promise<server.protocol.DefinitionInfoAndBoundSpanResponse>;
-  sendReferences(args: server.protocol.ReferencesRequest['arguments']): Promise<server.protocol.ReferencesResponse>;
-  sendRename(args: server.protocol.RenameRequest['arguments']): Promise<server.protocol.RenameResponse>;
+  sendReferences(
+    args: server.protocol.ReferencesRequest["arguments"],
+  ): Promise<server.protocol.ReferencesResponse>;
+  sendRename(
+    args: server.protocol.RenameRequest["arguments"],
+  ): Promise<server.protocol.RenameResponse>;
   sendSemanticDiagnosticsSync(
-    args: server.protocol.SemanticDiagnosticsSyncRequest['arguments'],
+    args: server.protocol.SemanticDiagnosticsSyncRequest["arguments"],
   ): Promise<server.protocol.SemanticDiagnosticsSyncResponse>;
   sendSyntacticDiagnosticsSync(
-    args: server.protocol.SyntacticDiagnosticsSyncRequest['arguments'],
+    args: server.protocol.SyntacticDiagnosticsSyncRequest["arguments"],
   ): Promise<server.protocol.SyntacticDiagnosticsSyncResponse>;
   sendGetEditsForFileRename(
-    args: server.protocol.GetEditsForFileRenameRequest['arguments'],
+    args: server.protocol.GetEditsForFileRenameRequest["arguments"],
   ): Promise<server.protocol.GetEditsForFileRenameResponse>;
   sendGetApplicableRefactors(
-    args: server.protocol.GetApplicableRefactorsRequest['arguments'],
+    args: server.protocol.GetApplicableRefactorsRequest["arguments"],
   ): Promise<server.protocol.GetApplicableRefactorsResponse>;
   sendGetEditsForRefactor(
-    args: server.protocol.GetEditsForRefactorRequest['arguments'],
+    args: server.protocol.GetEditsForRefactorRequest["arguments"],
   ): Promise<server.protocol.GetEditsForRefactorResponse>;
   sendCompletionInfo(
-    args: server.protocol.CompletionsRequest['arguments'],
+    args: server.protocol.CompletionsRequest["arguments"],
   ): Promise<server.protocol.CompletionInfoResponse>;
   sendCompletionDetails(
-    args: server.protocol.CompletionDetailsRequest['arguments'],
+    args: server.protocol.CompletionDetailsRequest["arguments"],
   ): Promise<server.protocol.CompletionDetailsResponse>;
-  sendGetCodeFixes(args: server.protocol.CodeFixRequest['arguments']): Promise<server.protocol.CodeFixResponse>;
+  sendGetCodeFixes(
+    args: server.protocol.CodeFixRequest["arguments"],
+  ): Promise<server.protocol.CodeFixResponse>;
 }
 
 export function launchTsserver(): Tsserver {
   const server = serverHarness.launchServer(
-    require.resolve('typescript/lib/tsserver.js'),
+    require.resolve("typescript/lib/tsserver.js"),
     [
-      '--disableAutomaticTypingAcquisition',
-      '--globalPlugins',
-      '@css-modules-kit/ts-plugin',
-      '--pluginProbeLocations',
+      "--disableAutomaticTypingAcquisition",
+      "--globalPlugins",
+      "@css-modules-kit/ts-plugin",
+      "--pluginProbeLocations",
       import.meta.dirname,
     ],
     [],
@@ -54,7 +64,7 @@ export function launchTsserver(): Tsserver {
   ): Promise<any> {
     const res: server.protocol.Response = await server.message({
       seq: seq++,
-      type: 'request',
+      type: "request",
       command,
       arguments: args,
     });
@@ -65,29 +75,44 @@ export function launchTsserver(): Tsserver {
   }
 
   return {
-    sendUpdateOpen: async (args) => sendRequest(ts.server.protocol.CommandTypes.UpdateOpen, args),
-    sendConfigure: async (args) => sendRequest(ts.server.protocol.CommandTypes.Configure, args),
+    sendUpdateOpen: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.UpdateOpen, args),
+    sendConfigure: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.Configure, args),
     sendDefinitionAndBoundSpan: async (args) =>
       sendRequest(ts.server.protocol.CommandTypes.DefinitionAndBoundSpan, args),
-    sendReferences: async (args) => sendRequest(ts.server.protocol.CommandTypes.References, args),
-    sendRename: async (args) => sendRequest(ts.server.protocol.CommandTypes.Rename, args),
+    sendReferences: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.References, args),
+    sendRename: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.Rename, args),
     sendSemanticDiagnosticsSync: async (args) =>
-      sendRequest(ts.server.protocol.CommandTypes.SemanticDiagnosticsSync, args),
+      sendRequest(
+        ts.server.protocol.CommandTypes.SemanticDiagnosticsSync,
+        args,
+      ),
     sendSyntacticDiagnosticsSync: async (args) =>
-      sendRequest(ts.server.protocol.CommandTypes.SyntacticDiagnosticsSync, args),
-    sendGetEditsForFileRename: async (args) => sendRequest(ts.server.protocol.CommandTypes.GetEditsForFileRename, args),
+      sendRequest(
+        ts.server.protocol.CommandTypes.SyntacticDiagnosticsSync,
+        args,
+      ),
+    sendGetEditsForFileRename: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.GetEditsForFileRename, args),
     sendGetApplicableRefactors: async (args) =>
       sendRequest(ts.server.protocol.CommandTypes.GetApplicableRefactors, args),
-    sendGetEditsForRefactor: async (args) => sendRequest(ts.server.protocol.CommandTypes.GetEditsForRefactor, args),
-    sendCompletionInfo: async (args) => sendRequest(ts.server.protocol.CommandTypes.CompletionInfo, args),
-    sendCompletionDetails: async (args) => sendRequest(ts.server.protocol.CommandTypes.CompletionDetails, args),
-    sendGetCodeFixes: async (args) => sendRequest(ts.server.protocol.CommandTypes.GetCodeFixes, args),
+    sendGetEditsForRefactor: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.GetEditsForRefactor, args),
+    sendCompletionInfo: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.CompletionInfo, args),
+    sendCompletionDetails: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.CompletionDetails, args),
+    sendGetCodeFixes: async (args) =>
+      sendRequest(ts.server.protocol.CommandTypes.GetCodeFixes, args),
   };
 }
 
 export function formatPath(path: string) {
   // In windows, tsserver returns paths with '/' instead of '\\'.
-  return path.replaceAll('\\', '/');
+  return path.replaceAll("\\", "/");
 }
 
 type SimplifiedDefinitionInfo = {
@@ -98,19 +123,29 @@ type SimplifiedDefinitionInfo = {
   contextEnd?: ts.server.protocol.Location;
 };
 
-export function normalizeDefinitions(definitions: readonly SimplifiedDefinitionInfo[]): SimplifiedDefinitionInfo[] {
+export function normalizeDefinitions(
+  definitions: readonly SimplifiedDefinitionInfo[],
+): SimplifiedDefinitionInfo[] {
   return definitions
     .map((definition) => {
       return {
         file: formatPath(definition.file),
         start: definition.start,
         end: definition.end,
-        ...('contextStart' in definition ? { contextStart: definition.contextStart } : {}),
-        ...('contextEnd' in definition ? { contextEnd: definition.contextEnd } : {}),
+        ...("contextStart" in definition
+          ? { contextStart: definition.contextStart }
+          : {}),
+        ...("contextEnd" in definition
+          ? { contextEnd: definition.contextEnd }
+          : {}),
       };
     })
     .toSorted((a, b) => {
-      return a.file.localeCompare(b.file) || a.start.line - b.start.line || a.start.offset - b.start.offset;
+      return (
+        a.file.localeCompare(b.file) ||
+        a.start.line - b.start.line ||
+        a.start.offset - b.start.offset
+      );
     });
 }
 
@@ -119,7 +154,9 @@ type SimplifiedSpanGroup = {
   locs: ts.server.protocol.TextSpan[];
 };
 
-export function normalizeSpanGroups(spanGroups: readonly SimplifiedSpanGroup[]): SimplifiedSpanGroup[] {
+export function normalizeSpanGroups(
+  spanGroups: readonly SimplifiedSpanGroup[],
+): SimplifiedSpanGroup[] {
   const sortedLocs = spanGroups
     .map((loc) => {
       return {
@@ -127,8 +164,8 @@ export function normalizeSpanGroups(spanGroups: readonly SimplifiedSpanGroup[]):
         locs: loc.locs.map((loc) => ({
           start: loc.start,
           end: loc.end,
-          ...('prefixText' in loc ? { prefixText: loc.prefixText } : {}),
-          ...('suffixText' in loc ? { suffixText: loc.suffixText } : {}),
+          ...("prefixText" in loc ? { prefixText: loc.prefixText } : {}),
+          ...("suffixText" in loc ? { suffixText: loc.suffixText } : {}),
         })),
       };
     })
@@ -149,7 +186,9 @@ type SimplifiedReferencesResponseItem = {
   end: ts.server.protocol.Location;
 };
 
-export function normalizeRefItems(refs: readonly SimplifiedReferencesResponseItem[]) {
+export function normalizeRefItems(
+  refs: readonly SimplifiedReferencesResponseItem[],
+) {
   return refs
     .map((ref) => {
       return {
@@ -159,14 +198,22 @@ export function normalizeRefItems(refs: readonly SimplifiedReferencesResponseIte
       };
     })
     .toSorted((a, b) => {
-      return a.file.localeCompare(b.file) || a.start.line - b.start.line || a.start.offset - b.start.offset;
+      return (
+        a.file.localeCompare(b.file) ||
+        a.start.line - b.start.line ||
+        a.start.offset - b.start.offset
+      );
     });
 }
 
-export function mergeSpanGroups(fileSpans: ts.server.protocol.FileSpan[]): SimplifiedSpanGroup[] {
+export function mergeSpanGroups(
+  fileSpans: ts.server.protocol.FileSpan[],
+): SimplifiedSpanGroup[] {
   const spanGroups: SimplifiedSpanGroup[] = [];
   for (const fileSpan of fileSpans) {
-    const existingGroup = spanGroups.find((group) => group.file === fileSpan.file);
+    const existingGroup = spanGroups.find(
+      (group) => group.file === fileSpan.file,
+    );
     if (existingGroup) {
       existingGroup.locs.push({ start: fileSpan.start, end: fileSpan.end });
     } else {
@@ -186,20 +233,22 @@ type SimplifiedCompletionEntry = {
   insertText?: string;
 };
 
-export function normalizeCompletionEntry(entries: readonly SimplifiedCompletionEntry[]): SimplifiedCompletionEntry[] {
+export function normalizeCompletionEntry(
+  entries: readonly SimplifiedCompletionEntry[],
+): SimplifiedCompletionEntry[] {
   return entries
     .map((entry) => {
       return {
         name: entry.name,
         sortText: entry.sortText,
-        ...('source' in entry ? { source: entry.source } : {}),
-        ...('insertText' in entry ? { insertText: entry.insertText } : {}),
+        ...("source" in entry ? { source: entry.source } : {}),
+        ...("insertText" in entry ? { insertText: entry.insertText } : {}),
       };
     })
     .toSorted(
       (a, b) =>
-        a.sortText?.localeCompare(b.sortText ?? '') ||
-        a.source?.localeCompare(b.source ?? '') ||
+        a.sortText?.localeCompare(b.sortText ?? "") ||
+        a.source?.localeCompare(b.source ?? "") ||
         a.name.localeCompare(b.name),
     );
 }
@@ -231,7 +280,9 @@ type SimplifiedCodeFixAction = {
   changes: ts.server.protocol.FileCodeEdits[];
 };
 
-export function normalizeCodeFixActions(actions: readonly SimplifiedCodeFixAction[]): SimplifiedCodeFixAction[] {
+export function normalizeCodeFixActions(
+  actions: readonly SimplifiedCodeFixAction[],
+): SimplifiedCodeFixAction[] {
   return actions
     .map((action) => {
       return {

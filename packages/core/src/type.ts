@@ -43,7 +43,7 @@ export interface Token {
  * @example `@import './a.module.css'`
  */
 export interface AllTokenImporter {
-  type: 'all';
+  type: "all";
   /**
    * The specifier of the file from which the tokens are imported.
    * This is a string before being resolved and unquoted.
@@ -59,7 +59,7 @@ export interface AllTokenImporter {
  * @example `@value a, b as c from './a.module.css'`
  */
 export interface NamedTokenImporter {
-  type: 'named';
+  type: "named";
   /** The entries describing each imported token. */
   entries: NamedTokenImporterEntry[];
   /**
@@ -105,7 +105,7 @@ export type TokenImporter = AllTokenImporter | NamedTokenImporter;
  * `@keyframes foo {...}`) or imported from another file (e.g. via `@import`).
  */
 export interface LocalTokenReference {
-  type: 'local';
+  type: "local";
   /** The referenced token name. */
   name: string;
   /** The location of the reference name in the source file. */
@@ -117,7 +117,7 @@ export interface LocalTokenReference {
  * @example `composes: foo bar from './a.module.css'` references the `foo` and `bar` tokens of `./a.module.css`.
  */
 export interface ExternalTokenReference {
-  type: 'external';
+  type: "external";
   /** The entries describing each referenced token. */
   entries: ExternalTokenReferenceEntry[];
   /**
@@ -185,7 +185,10 @@ export interface ResolverOptions {
  * @param options The options.
  * @returns The resolved import specifier. It is a absolute path. If the import specifier cannot be resolved, return `undefined`.
  */
-export type Resolver = (specifier: string, options: ResolverOptions) => string | undefined;
+export type Resolver = (
+  specifier: string,
+  options: ResolverOptions,
+) => string | undefined;
 
 /**
  * A function that checks if a file name matches a pattern.
@@ -205,7 +208,7 @@ export interface ExportBuilder {
   clearCache(): void;
 }
 
-export type DiagnosticCategory = 'error' | 'warning';
+export type DiagnosticCategory = "error" | "warning";
 
 export interface DiagnosticSourceFile {
   fileName: string;

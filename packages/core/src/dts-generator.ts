@@ -1,9 +1,14 @@
-import { basename } from './path.js';
-import type { CSSModule, Token, TokenImporter, TokenReference } from './type.js';
-import type { ValidateTokenNameOptions } from './util.js';
-import { isURLSpecifier, validateTokenName } from './util.js';
+import { basename } from "./path.js";
+import type {
+  CSSModule,
+  Token,
+  TokenImporter,
+  TokenReference,
+} from "./type.js";
+import type { ValidateTokenNameOptions } from "./util.js";
+import { isURLSpecifier, validateTokenName } from "./util.js";
 
-export const STYLES_EXPORT_NAME = 'styles';
+export const STYLES_EXPORT_NAME = "styles";
 
 export interface GenerateDtsOptions {
   namedExports: boolean;
@@ -45,32 +50,43 @@ export interface GenerateDtsResult {
 /**
  * Generate .d.ts from `CSSModule`.
  */
-export function generateDts(cssModule: CSSModule, options: GenerateDtsOptions): GenerateDtsResult {
+export function generateDts(
+  cssModule: CSSModule,
+  options: GenerateDtsOptions,
+): GenerateDtsResult {
   // Exclude invalid tokens
-  const localTokens = cssModule.localTokens.filter((token) => isValidTokenName(token.name, options));
+  const localTokens = cssModule.localTokens.filter((token) =>
+    isValidTokenName(token.name, options),
+  );
   const tokenReferences = cssModule.tokenReferences
     // Exclude invalid referenced tokens
     .map((ref) => {
-      if (ref.type === 'external') {
-        return { ...ref, entries: ref.entries.filter((entry) => isValidTokenName(entry.name, options)) };
+      if (ref.type === "external") {
+        return {
+          ...ref,
+          entries: ref.entries.filter((entry) =>
+            isValidTokenName(entry.name, options),
+          ),
+        };
       }
       return ref;
     })
     .filter((ref) => {
-      if (ref.type === 'local') return isValidTokenName(ref.name, options);
+      if (ref.type === "local") return isValidTokenName(ref.name, options);
       // Like token importers, external references with URL specifiers are excluded
       return !isURLSpecifier(ref.from);
     });
   const tokenImporters = cssModule.tokenImporters
     // Exclude invalid imported tokens
     .map((tokenImporter) => {
-      if (tokenImporter.type === 'named') {
+      if (tokenImporter.type === "named") {
         return {
           ...tokenImporter,
           entries: tokenImporter.entries.filter(
             (entry) =>
               isValidTokenName(entry.name, options) &&
-              (entry.localName === undefined || isValidTokenName(entry.localName, options)),
+              (entry.localName === undefined ||
+                isValidTokenName(entry.localName, options)),
           ),
         };
       } else {
@@ -117,9 +133,20 @@ export function generateDts(cssModule: CSSModule, options: GenerateDtsOptions): 
     });
 
   if (options.namedExports) {
-    return generateNamedExportsDts(cssModule.fileName, localTokens, tokenImporters, tokenReferences, options);
+    return generateNamedExportsDts(
+      cssModule.fileName,
+      localTokens,
+      tokenImporters,
+      tokenReferences,
+      options,
+    );
   } else {
-    return generateDefaultExportDts(localTokens, tokenImporters, tokenReferences, options);
+    return generateDefaultExportDts(
+      localTokens,
+      tokenImporters,
+      tokenReferences,
+      options,
+    );
   }
 }
 
@@ -130,7 +157,11 @@ function generateNamedExportsDts(
   tokenImporters: TokenImporter[],
   tokenReferences: TokenReference[],
   options: GenerateDtsOptions,
-): { text: string; mapping: CodeMapping; linkedCodeMapping: LinkedCodeMapping } {
+): {
+  text: string;
+  mapping: CodeMapping;
+  linkedCodeMapping: LinkedCodeMapping;
+} {
   const mapping: Required<CodeMapping> = {
     sourceOffsets: [],
     lengths: [],
@@ -152,7 +183,9 @@ function generateNamedExportsDts(
   let text = `// @ts-nocheck\n`;
 
   const groupedLocalTokens = Object.groupBy(localTokens, (token) => token.name);
-  for (const [index, [name, tokens]] of Object.entries(groupedLocalTokens).entries()) {
+  for (const [index, [name, tokens]] of Object.entries(
+    groupedLocalTokens,
+  ).entries()) {
     if (tokens === undefined || tokens.length === 0) continue;
     const internalName = `_token_${index}`;
     for (const token of tokens) {
@@ -172,7 +205,7 @@ function generateNamedExportsDts(
     text += `'${name}' };\n`;
   }
   for (const tokenImporter of tokenImporters) {
-    if (tokenImporter.type === 'all') {
+    if (tokenImporter.type === "all") {
       text += `export * from `;
       mapping.sourceOffsets.push(tokenImporter.fromLoc.start.offset - 1);
       mapping.lengths.push(tokenImporter.from.length + 2);
@@ -188,7 +221,7 @@ function generateNamedExportsDts(
         linkedCodeMapping.sourceOffsets.push(text.length);
         linkedCodeMapping.lengths.push(entry.name.length + 2);
         text += `'`;
-        if ('localName' in entry) {
+        if ("localName" in entry) {
           mapping.sourceOffsets.push(entry.loc.start.offset);
           mapping.lengths.push(entry.name.length);
           mapping.generatedOffsets.push(text.length);
@@ -215,17 +248,18 @@ function generateNamedExportsDts(
 
   // Ensure the generated file is treated as a module even when no other
   // top-level export/import is emitted (e.g. an empty CSS Module file).
-  const noModuleSyntax = localTokens.length === 0 && tokenImporters.length === 0;
+  const noModuleSyntax =
+    localTokens.length === 0 && tokenImporters.length === 0;
   if (noModuleSyntax) {
-    text += 'export {};\n';
+    text += "export {};\n";
   }
 
   if (options.forTsPlugin && tokenReferences.length > 0) {
-    if (tokenReferences.some((ref) => ref.type === 'local')) {
+    if (tokenReferences.some((ref) => ref.type === "local")) {
       text += `declare const __self: typeof import('./${basename(fileName)}');\n`;
     }
     for (const ref of tokenReferences) {
-      if (ref.type === 'local') {
+      if (ref.type === "local") {
         text += `__self['`;
         mapping.sourceOffsets.push(ref.loc.start.offset);
         mapping.lengths.push(ref.name.length);
@@ -253,7 +287,7 @@ function generateNamedExportsDts(
   }
   if (options.forTsPlugin && !options.prioritizeNamedImports) {
     // Export `styles` to appear in code completion suggestions
-    text += 'declare const styles: {};\nexport default styles;\n';
+    text += "declare const styles: {};\nexport default styles;\n";
   }
   return { text, mapping, linkedCodeMapping };
 }
@@ -269,7 +303,11 @@ function generateDefaultExportDts(
   mapping: CodeMapping;
   linkedCodeMapping: LinkedCodeMapping;
 } {
-  const mapping: CodeMapping = { sourceOffsets: [], lengths: [], generatedOffsets: [] };
+  const mapping: CodeMapping = {
+    sourceOffsets: [],
+    lengths: [],
+    generatedOffsets: [],
+  };
   const linkedCodeMapping: LinkedCodeMapping = {
     sourceOffsets: [],
     lengths: [],
@@ -289,7 +327,7 @@ function generateDefaultExportDts(
   // However, the import type for an unresolvable specifier becomes a special `any` type called `errorType`.
   // The technique from https://stackoverflow.com/a/55541672 does not work with `errorType`.
   // Therefore, this combines it with the approach from https://github.com/microsoft/TypeScript/issues/62972.
-  if (tokenImporters.some((importer) => importer.type === 'all')) {
+  if (tokenImporters.some((importer) => importer.type === "all")) {
     text += `function blockErrorType<T>(val: T): [0] extends [(1 & T)] ? {} : T;\n`;
   }
 
@@ -302,7 +340,7 @@ function generateDefaultExportDts(
     text += `${token.name}': '' as string,\n`;
   }
   for (const tokenImporter of tokenImporters) {
-    if (tokenImporter.type === 'all') {
+    if (tokenImporter.type === "all") {
       text += `  ...blockErrorType((await import(`;
       mapping.sourceOffsets.push(tokenImporter.fromLoc.start.offset - 1);
       mapping.lengths.push(tokenImporter.from.length + 2);
@@ -327,7 +365,7 @@ function generateDefaultExportDts(
           mapping.generatedOffsets.push(text.length);
         }
         text += `'${tokenImporter.from}')).default['`;
-        if ('localName' in entry) {
+        if ("localName" in entry) {
           mapping.sourceOffsets.push(entry.loc.start.offset);
           mapping.lengths.push(entry.name.length);
           mapping.generatedOffsets.push(text.length);
@@ -342,7 +380,7 @@ function generateDefaultExportDts(
 
   if (options.forTsPlugin) {
     for (const ref of tokenReferences) {
-      if (ref.type === 'local') {
+      if (ref.type === "local") {
         text += `${STYLES_EXPORT_NAME}['`;
         mapping.sourceOffsets.push(ref.loc.start.offset);
         mapping.lengths.push(ref.name.length);
@@ -369,6 +407,9 @@ function generateDefaultExportDts(
   return { text, mapping, linkedCodeMapping };
 }
 
-function isValidTokenName(name: string, options: ValidateTokenNameOptions): boolean {
+function isValidTokenName(
+  name: string,
+  options: ValidateTokenNameOptions,
+): boolean {
   return validateTokenName(name, options) === undefined;
 }

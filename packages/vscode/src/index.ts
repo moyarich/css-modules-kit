@@ -1,5 +1,5 @@
 // oxlint-disable-next-line no-restricted-imports
-import { dirname, join } from 'node:path';
+import { dirname, join } from "node:path";
 import type {
   CSSModulesKitDocumentLinkRequest,
   CSSModulesKitDocumentLinkResponse,
@@ -9,40 +9,57 @@ import type {
   CSSModulesKitRenameInfoResponse,
   CSSModulesKitRenameRequest,
   CSSModulesKitRenameResponse,
-} from '@css-modules-kit/ts-plugin/type';
-import * as vscode from 'vscode';
+} from "@css-modules-kit/ts-plugin/type";
+import * as vscode from "vscode";
 
-async function buildFileRenameEdit(oldFilePath: string, newName: string): Promise<vscode.WorkspaceEdit | undefined> {
+async function buildFileRenameEdit(
+  oldFilePath: string,
+  newName: string,
+): Promise<vscode.WorkspaceEdit | undefined> {
   const newFilePath = join(dirname(oldFilePath), newName);
-  const editsRes = await vscode.commands.executeCommand<CSSModulesKitGetEditsForFileRenameResponse>(
-    'typescript.tsserverRequest',
-    '_css-modules-kit:getEditsForFileRename',
-    { oldFilePath, newFilePath } satisfies CSSModulesKitGetEditsForFileRenameRequest['arguments'],
-  );
+  const editsRes =
+    await vscode.commands.executeCommand<CSSModulesKitGetEditsForFileRenameResponse>(
+      "typescript.tsserverRequest",
+      "_css-modules-kit:getEditsForFileRename",
+      {
+        oldFilePath,
+        newFilePath,
+      } satisfies CSSModulesKitGetEditsForFileRenameRequest["arguments"],
+    );
   if (!editsRes.success || !editsRes.body?.result) return undefined;
 
   const edit = new vscode.WorkspaceEdit();
   edit.renameFile(vscode.Uri.file(oldFilePath), vscode.Uri.file(newFilePath));
   for (const fileEdit of editsRes.body.result) {
     // oxlint-disable-next-line no-await-in-loop
-    const targetDoc = await vscode.workspace.openTextDocument(fileEdit.fileName);
+    const targetDoc = await vscode.workspace.openTextDocument(
+      fileEdit.fileName,
+    );
     for (const change of fileEdit.textChanges) {
       const start = targetDoc.positionAt(change.span.start);
       const end = targetDoc.positionAt(change.span.start + change.span.length);
-      edit.replace(vscode.Uri.file(fileEdit.fileName), new vscode.Range(start, end), change.newText);
+      edit.replace(
+        vscode.Uri.file(fileEdit.fileName),
+        new vscode.Range(start, end),
+        change.newText,
+      );
     }
   }
   return edit;
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('[css-modules-kit-vscode] Activated');
+  console.log("[css-modules-kit-vscode] Activated");
 
   // By default, `vscode.typescript-language-features` is not activated when a user opens *.css in VS Code.
   // So, activate it manually.
-  const tsExtension = vscode.extensions.getExtension('vscode.typescript-language-features');
+  const tsExtension = vscode.extensions.getExtension(
+    "vscode.typescript-language-features",
+  );
   if (tsExtension && !tsExtension.isActive) {
-    console.log('[css-modules-kit-vscode] Activating `vscode.typescript-language-features`');
+    console.log(
+      "[css-modules-kit-vscode] Activating `vscode.typescript-language-features`",
+    );
     tsExtension.activate();
   }
 
@@ -51,74 +68,95 @@ export function activate(context: vscode.ExtensionContext) {
     // Therefore, an approach called "Request Forwarding to tsserver" is used to avoid this conflict.
     // See https://github.com/mizdra/css-modules-kit/pull/207 for more details.
     vscode.languages.registerRenameProvider(
-      { scheme: 'file', language: 'css' },
+      { scheme: "file", language: "css" },
       {
         async provideRenameEdits(document, position, newName, _token) {
           // Detect a file rename (renaming a CSS module via its `@import` / `@value ... from` specifier).
           // When the language service reports `fileToRename`, the editor must perform a file rename plus a
           // `getEditsForFileRename`-driven import update.
-          const infoRes = await vscode.commands.executeCommand<CSSModulesKitRenameInfoResponse>(
-            'typescript.tsserverRequest',
-            '_css-modules-kit:renameInfo',
-            {
-              fileName: document.fileName,
-              position: document.offsetAt(position),
-            } satisfies CSSModulesKitRenameInfoRequest['arguments'],
-          );
+          const infoRes =
+            await vscode.commands.executeCommand<CSSModulesKitRenameInfoResponse>(
+              "typescript.tsserverRequest",
+              "_css-modules-kit:renameInfo",
+              {
+                fileName: document.fileName,
+                position: document.offsetAt(position),
+              } satisfies CSSModulesKitRenameInfoRequest["arguments"],
+            );
           const info = infoRes.success ? infoRes.body?.result : undefined;
           if (info?.canRename && info.fileToRename) {
             return buildFileRenameEdit(info.fileToRename, newName);
           }
 
-          const res = await vscode.commands.executeCommand<CSSModulesKitRenameResponse>(
-            'typescript.tsserverRequest',
-            '_css-modules-kit:rename',
-            {
-              fileName: document.fileName,
-              position: document.offsetAt(position),
-            } satisfies CSSModulesKitRenameRequest['arguments'],
-          );
+          const res =
+            await vscode.commands.executeCommand<CSSModulesKitRenameResponse>(
+              "typescript.tsserverRequest",
+              "_css-modules-kit:rename",
+              {
+                fileName: document.fileName,
+                position: document.offsetAt(position),
+              } satisfies CSSModulesKitRenameRequest["arguments"],
+            );
           // If the response does not contain any results, return undefined to fall back to standard CSS Language Server.
-          if (!res.success || !res.body || !res.body.result || res.body.result.length === 0) return;
+          if (
+            !res.success ||
+            !res.body ||
+            !res.body.result ||
+            res.body.result.length === 0
+          )
+            return;
           const edit = new vscode.WorkspaceEdit();
           for (const location of res.body.result) {
             // oxlint-disable-next-line no-await-in-loop
-            const document = await vscode.workspace.openTextDocument(location.fileName);
+            const document = await vscode.workspace.openTextDocument(
+              location.fileName,
+            );
             const start = document.positionAt(location.textSpan.start);
-            const end = document.positionAt(location.textSpan.start + location.textSpan.length);
-            edit.replace(vscode.Uri.file(location.fileName), new vscode.Range(start, end), newName);
+            const end = document.positionAt(
+              location.textSpan.start + location.textSpan.length,
+            );
+            edit.replace(
+              vscode.Uri.file(location.fileName),
+              new vscode.Range(start, end),
+              newName,
+            );
           }
           return edit;
         },
         async prepareRename(document, position, _token) {
-          const res = await vscode.commands.executeCommand<CSSModulesKitRenameInfoResponse>(
-            'typescript.tsserverRequest',
-            '_css-modules-kit:renameInfo',
-            {
-              fileName: document.fileName,
-              position: document.offsetAt(position),
-            } satisfies CSSModulesKitRenameInfoRequest['arguments'],
-          );
+          const res =
+            await vscode.commands.executeCommand<CSSModulesKitRenameInfoResponse>(
+              "typescript.tsserverRequest",
+              "_css-modules-kit:renameInfo",
+              {
+                fileName: document.fileName,
+                position: document.offsetAt(position),
+              } satisfies CSSModulesKitRenameInfoRequest["arguments"],
+            );
           // If the response does not contain any results, return undefined to fall back to standard CSS Language Server.
           if (!res.success || !res.body || !res.body.result.canRename) return;
           return new vscode.Range(
             document.positionAt(res.body.result.triggerSpan.start),
-            document.positionAt(res.body.result.triggerSpan.start + res.body.result.triggerSpan.length),
+            document.positionAt(
+              res.body.result.triggerSpan.start +
+                res.body.result.triggerSpan.length,
+            ),
           );
         },
       },
     ),
     vscode.languages.registerDocumentLinkProvider(
-      { scheme: 'file', language: 'css' },
+      { scheme: "file", language: "css" },
       {
         async provideDocumentLinks(document, _token) {
-          const res = await vscode.commands.executeCommand<CSSModulesKitDocumentLinkResponse>(
-            'typescript.tsserverRequest',
-            '_css-modules-kit:documentLink',
-            {
-              fileName: document.fileName,
-            } satisfies CSSModulesKitDocumentLinkRequest['arguments'],
-          );
+          const res =
+            await vscode.commands.executeCommand<CSSModulesKitDocumentLinkResponse>(
+              "typescript.tsserverRequest",
+              "_css-modules-kit:documentLink",
+              {
+                fileName: document.fileName,
+              } satisfies CSSModulesKitDocumentLinkRequest["arguments"],
+            );
           // If the response does not contain any results, return undefined to fall back to standard CSS Language Server.
           if (!res.success || !res.body || res.body.result.length === 0) return;
           return res.body.result.map((link) => {

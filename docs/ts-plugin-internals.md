@@ -34,8 +34,8 @@ When `generateDts()` is called on this file, it generates the following type def
 
 ```ts
 declare const styles = {
-  'a_1': '',
-  'a_2': '',
+  a_1: "",
+  a_2: "",
 };
 ```
 
@@ -60,8 +60,8 @@ The `.d.ts` and mapping generated from the earlier `src/a.module.css` are as fol
 
 ```ts
 declare const styles = {
-  'a_1': '',
-  'a_2': '',
+  a_1: "",
+  a_2: "",
 };
 export default styles;
 ```
@@ -79,7 +79,7 @@ For example, suppose we have the following CSS module:
 `src/a.module.css`:
 
 ```css
-@import './b.module.css';
+@import "./b.module.css";
 ```
 
 For default export, it is represented with object spread:
@@ -87,14 +87,14 @@ For default export, it is represented with object spread:
 ```ts
 function blockErrorType<T>(val: T): [0] extends [1 & T] ? {} : T;
 declare const styles = {
-  ...blockErrorType((await import('./b.module.css')).default),
+  ...blockErrorType((await import("./b.module.css")).default),
 };
 ```
 
 For named exports, it is represented with barrel re-export:
 
 ```ts
-export * from './b.module.css';
+export * from "./b.module.css";
 ```
 
 ### The Role of `blockErrorType`
@@ -127,18 +127,15 @@ For default export, the following type definition is generated:
 
 ```ts
 declare const styles = {
-  'b_1': (await import('./b.module.css')).default['b_1'],
-  'aliased_b_2': (await import('./b.module.css')).default['b_2'],
+  b_1: (await import("./b.module.css")).default["b_1"],
+  aliased_b_2: (await import("./b.module.css")).default["b_2"],
 };
 ```
 
 For named exports, the following type definition is generated:
 
 ```ts
-export {
-  'b_1' as 'b_1',
-  'b_2' as 'aliased_b_2',
-} from './b.module.css';
+export { "b_1" as "b_1", "b_2" as "aliased_b_2" } from "./b.module.css";
 ```
 
 ### LinkedCodeMapping
@@ -177,8 +174,8 @@ interface LinkedCodeMapping {
 
 ```ts
 declare const styles = {
-  'b_1': (await import('./b.module.css')).default['b_1'],
-  'aliased_b_2': (await import('./b.module.css')).default['b_2'],
+  b_1: (await import("./b.module.css")).default["b_1"],
+  aliased_b_2: (await import("./b.module.css")).default["b_2"],
 };
 ```
 
@@ -198,7 +195,7 @@ For default export:
 
 ```ts
 declare const styles = {
-  'a-1': '',
+  "a-1": "",
 };
 ```
 
@@ -206,7 +203,7 @@ For named export:
 
 ```ts
 var _token_0: string;
-export { _token_0 as 'a-1' };
+export { _token_0 as "a-1" };
 ```
 
 ### Support for Multiple Definitions of the Same Token
@@ -227,7 +224,7 @@ When the same token is defined multiple times, Go to Definition should be able t
 `src/a.ts`:
 
 ```ts
-import styles from './a.module.css';
+import styles from "./a.module.css";
 styles.a_1;
 ```
 
@@ -237,8 +234,8 @@ When Go to Definition is invoked on `styles.a_1`, it should be able to jump to b
 
 ```ts
 declare const styles = {
-  'a_1': '',
-  'a_1': '',
+  a_1: "",
+  a_1: "",
 };
 export default styles;
 ```
@@ -256,7 +253,7 @@ For named export, the following code and mapping are generated:
 ```ts
 var _token_0: string;
 var _token_0: string;
-export { _token_0 as 'a_1' };
+export { _token_0 as "a_1" };
 ```
 
 mapping:
@@ -273,7 +270,7 @@ For example, suppose we have the following type definition:
 
 ```ts
 declare const styles = {
-  'a_1': string,
+  a_1: string,
 };
 ```
 
@@ -316,18 +313,21 @@ For example, suppose we have the following CSS module:
 `src/a.module.css`:
 
 ```css
-@keyframes a_1 {}
-.a_2 { animation-name: a_1; }
+@keyframes a_1 {
+}
+.a_2 {
+  animation-name: a_1;
+}
 ```
 
 For default export, the following type definition is generated:
 
 ```ts
 declare const styles = {
-  'a_1': '' as string,
-  'a_2': '' as string,
+  a_1: "" as string,
+  a_2: "" as string,
 } as const;
-styles['a_1'];
+styles["a_1"];
 export default styles;
 ```
 
@@ -337,11 +337,11 @@ For named export, the following type definition is generated:
 
 ```ts
 var _token_0: string;
-export { _token_0 as 'a_1' };
+export { _token_0 as "a_1" };
 var _token_1: string;
-export { _token_1 as 'a_2' };
-declare const __self: typeof import('./a.module.css');
-__self['a_1'];
+export { _token_1 as "a_2" };
+declare const __self: typeof import("./a.module.css");
+__self["a_1"];
 ```
 
 ### External Token References (`composes: ... from '<specifier>'`) Support
@@ -353,17 +353,19 @@ For example, suppose we have the following CSS module:
 `src/a.module.css`:
 
 ```css
-.a_1 { composes: b_1 b_2 from './b.module.css'; }
+.a_1 {
+  composes: b_1 b_2 from "./b.module.css";
+}
 ```
 
 For default export, the following type definition is generated:
 
 ```ts
 declare const styles = {
-  'a_1': '' as string,
+  a_1: "" as string,
 } as const;
-(await import('./b.module.css')).default['b_1'];
-(await import('./b.module.css')).default['b_2'];
+(await import("./b.module.css")).default["b_1"];
+(await import("./b.module.css")).default["b_2"];
 export default styles;
 ```
 
@@ -371,7 +373,7 @@ For named export, the following type definition is generated:
 
 ```ts
 var _token_0: string;
-export { _token_0 as 'a_1' };
-(await import('./b.module.css'))['b_1'];
-(await import('./b.module.css'))['b_2'];
+export { _token_0 as "a_1" };
+(await import("./b.module.css"))["b_1"];
+(await import("./b.module.css"))["b_2"];
 ```

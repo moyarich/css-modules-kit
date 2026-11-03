@@ -12,14 +12,14 @@ npm i -D @css-modules-kit/eslint-plugin
 
 ```js
 // eslint.config.js
-import { defineConfig } from 'eslint/config';
-import css from '@eslint/css';
-import cssModulesKit from '@css-modules-kit/eslint-plugin';
+import { defineConfig } from "eslint/config";
+import css from "@eslint/css";
+import cssModulesKit from "@css-modules-kit/eslint-plugin";
 
 export default defineConfig([
   {
-    files: ['**/*.css'],
-    language: 'css/css',
+    files: ["**/*.css"],
+    language: "css/css",
     languageOptions: {
       tolerant: true, // Required if you use `@value` rule or `composes` property
     },
@@ -33,7 +33,13 @@ For vscode-eslint users, you need to add the following configuration to your `se
 ```jsonc
 // .vscode/settings.json
 {
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "css"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "css",
+  ],
 }
 ```
 

@@ -17,7 +17,7 @@ This rule checks for unused CSS class names in CSS module files. It warns when c
 
 ```tsx
 // a.tsx
-import styles from './a.module.css';
+import styles from "./a.module.css";
 styles.used;
 ```
 
@@ -32,7 +32,7 @@ styles.used;
 
 ```tsx
 // a.tsx
-import styles from './a.module.css';
+import styles from "./a.module.css";
 ```
 
 ## When Not To Use It

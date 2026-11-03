@@ -1,6 +1,8 @@
-import type ts from 'typescript';
+import type ts from "typescript";
 
-export function findReferences(languageService: ts.LanguageService): ts.LanguageService['findReferences'] {
+export function findReferences(
+  languageService: ts.LanguageService,
+): ts.LanguageService["findReferences"] {
   return (...args) => {
     const symbols = languageService.findReferences(...args);
     if (!symbols) return symbols;
@@ -12,7 +14,9 @@ export function findReferences(languageService: ts.LanguageService): ts.Language
  * Merges ReferencedSymbols that have the same definition into one,
  * combining their references.
  */
-function mergeSameDefinitionSymbols(symbols: ts.ReferencedSymbol[]): ts.ReferencedSymbol[] {
+function mergeSameDefinitionSymbols(
+  symbols: ts.ReferencedSymbol[],
+): ts.ReferencedSymbol[] {
   // Volar.js may return multiple ReferencedSymbols with the same definition
   // when a VirtualCode contains multiple CodeMapping objects.
   // Editors usually merge symbols with the same definition before displaying them,
@@ -24,7 +28,10 @@ function mergeSameDefinitionSymbols(symbols: ts.ReferencedSymbol[]): ts.Referenc
     const key = `${def.fileName}:${def.textSpan.start}:${def.textSpan.length}`;
     const existing = map.get(key);
     if (existing) {
-      existing.references = uniqueReferences([...existing.references, ...symbol.references]);
+      existing.references = uniqueReferences([
+        ...existing.references,
+        ...symbol.references,
+      ]);
     } else {
       map.set(key, symbol);
     }
@@ -32,7 +39,9 @@ function mergeSameDefinitionSymbols(symbols: ts.ReferencedSymbol[]): ts.Referenc
   return Array.from(map.values());
 }
 
-function uniqueReferences(references: ts.ReferencedSymbolEntry[]): ts.ReferencedSymbolEntry[] {
+function uniqueReferences(
+  references: ts.ReferencedSymbolEntry[],
+): ts.ReferencedSymbolEntry[] {
   const seen = new Set<string>();
   const result: ts.ReferencedSymbolEntry[] = [];
   for (const ref of references) {

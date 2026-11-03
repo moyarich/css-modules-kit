@@ -1,8 +1,13 @@
-import type { CSSModule, ExportBuilder, MatchesPattern, Resolver } from '@css-modules-kit/core';
-import { checkCSSModule, convertDiagnostic } from '@css-modules-kit/core';
-import type { Language } from '@volar/language-core';
-import type ts from 'typescript';
-import { CMK_DATA_KEY, isCSSModuleScript } from '../../language-plugin.js';
+import type {
+  CSSModule,
+  ExportBuilder,
+  MatchesPattern,
+  Resolver,
+} from "@css-modules-kit/core";
+import { checkCSSModule, convertDiagnostic } from "@css-modules-kit/core";
+import type { Language } from "@volar/language-core";
+import type ts from "typescript";
+import { CMK_DATA_KEY, isCSSModuleScript } from "../../language-plugin.js";
 
 export function getSemanticDiagnostics(
   language: Language<string>,
@@ -11,7 +16,7 @@ export function getSemanticDiagnostics(
   resolver: Resolver,
   matchesPattern: MatchesPattern,
   getCSSModule: (path: string) => CSSModule | undefined,
-): ts.LanguageService['getSemanticDiagnostics'] {
+): ts.LanguageService["getSemanticDiagnostics"] {
   return (...args) => {
     const [fileName] = args;
     const prior = languageService.getSemanticDiagnostics(...args);
@@ -30,7 +35,9 @@ export function getSemanticDiagnostics(
         getCSSModule,
       });
       const sourceFile = languageService.getProgram()!.getSourceFile(fileName)!;
-      const tsDiagnostics = diagnostics.map((diagnostic) => convertDiagnostic(diagnostic, () => sourceFile));
+      const tsDiagnostics = diagnostics.map((diagnostic) =>
+        convertDiagnostic(diagnostic, () => sourceFile),
+      );
       prior.push(...tsDiagnostics);
     }
     return prior;

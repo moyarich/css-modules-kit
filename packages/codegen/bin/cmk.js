@@ -8,7 +8,7 @@ import {
   runCMK,
   runCMKInWatchMode,
   shouldBePretty,
-} from '../dist/index.js';
+} from "../dist/index.js";
 
 const cwd = process.cwd();
 let logger = createLogger(cwd, shouldBePretty(undefined));
@@ -31,7 +31,7 @@ try {
   if (args.watch) {
     const watcher = await runCMKInWatchMode(args, logger);
     // oxlint-disable-next-line typescript/no-misused-promises
-    process.on('SIGINT', async () => watcher.close());
+    process.on("SIGINT", async () => watcher.close());
   } else {
     const success = await runCMK(args, logger);
     if (!success) {

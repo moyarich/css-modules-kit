@@ -1,9 +1,9 @@
-import { execSync } from 'node:child_process';
+import { execSync } from "node:child_process";
 // oxlint-disable-next-line no-restricted-imports
-import { resolve } from 'node:path';
+import { resolve } from "node:path";
 
-const root = resolve(import.meta.dirname, '..');
+const root = resolve(import.meta.dirname, "..");
 
 export function mochaGlobalSetup() {
-  execSync('vp run build', { stdio: 'inherit', cwd: root });
+  execSync("vp run build", { stdio: "inherit", cwd: root });
 }

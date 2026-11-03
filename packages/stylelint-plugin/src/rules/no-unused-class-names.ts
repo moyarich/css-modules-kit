@@ -1,11 +1,17 @@
-import { basename, findComponentFile, findUsedTokenNames, isCSSModuleFile, parseRule } from '@css-modules-kit/core';
-import type { Rule, RuleMeta } from 'stylelint';
-import stylelint from 'stylelint';
-import { readFile } from '../util.js';
+import {
+  basename,
+  findComponentFile,
+  findUsedTokenNames,
+  isCSSModuleFile,
+  parseRule,
+} from "@css-modules-kit/core";
+import type { Rule, RuleMeta } from "stylelint";
+import stylelint from "stylelint";
+import { readFile } from "../util.js";
 
 const { createPlugin, utils } = stylelint;
 
-const ruleName = 'css-modules-kit/no-unused-class-names';
+const ruleName = "css-modules-kit/no-unused-class-names";
 
 const messages = utils.ruleMessages(ruleName, {
   disallow: (className: string, componentFileName: string) =>
@@ -13,7 +19,7 @@ const messages = utils.ruleMessages(ruleName, {
 });
 
 const meta: RuleMeta = {
-  url: 'https://github.com/mizdra/css-modules-kit/blob/main/packages/eslint-plugin/docs/rules/no-unused-class-names.md',
+  url: "https://github.com/mizdra/css-modules-kit/blob/main/packages/eslint-plugin/docs/rules/no-unused-class-names.md",
 };
 
 const ruleFunction: Rule = (_primaryOptions, _secondaryOptions, _context) => {
@@ -38,7 +44,10 @@ const ruleFunction: Rule = (_primaryOptions, _secondaryOptions, _context) => {
           utils.report({
             result,
             ruleName,
-            message: messages.disallow(classSelector.name, componentFile.fileName),
+            message: messages.disallow(
+              classSelector.name,
+              componentFile.fileName,
+            ),
             node: rule,
             index: classSelector.loc.start.offset - rule.source!.start!.offset,
             endIndex: classSelector.loc.end.offset - rule.source!.start!.offset,

@@ -1,45 +1,53 @@
 // oxlint-disable-next-line no-restricted-imports
-import { resolve } from 'node:path';
-import mizdraOxfmtConfig from '@mizdra/oxfmt-config';
-import mizdraOxlintConfig from '@mizdra/oxlint-config';
-import { defineConfig } from 'vite-plus';
+import { resolve } from "node:path";
+import mizdraOxfmtConfig from "@mizdra/oxfmt-config";
+import mizdraOxlintConfig from "@mizdra/oxlint-config";
+import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   staged: {
-    '*': 'vp check --fix',
+    "*": "vp check --fix",
   },
   lint: {
-    extends: [mizdraOxlintConfig.base, mizdraOxlintConfig.typescript, mizdraOxlintConfig.node],
-    ignorePatterns: ['examples', 'crates', 'packages/vscode/vscode-test/fixtures'],
+    extends: [
+      mizdraOxlintConfig.base,
+      mizdraOxlintConfig.typescript,
+      mizdraOxlintConfig.node,
+    ],
+    ignorePatterns: [
+      "examples",
+      "crates",
+      "packages/vscode/vscode-test/fixtures",
+    ],
     rules: {
-      'no-restricted-globals': [
-        'error',
+      "no-restricted-globals": [
+        "error",
         {
-          name: 'Buffer',
-          message: 'Use Uint8Array instead.',
+          name: "Buffer",
+          message: "Use Uint8Array instead.",
         },
       ],
-      'no-restricted-imports': [
-        'error',
+      "no-restricted-imports": [
+        "error",
         {
           paths: [
             {
-              name: 'buffer',
-              message: 'Use Uint8Array instead.',
+              name: "buffer",
+              message: "Use Uint8Array instead.",
             },
             {
-              name: 'node:buffer',
-              message: 'Use Uint8Array instead.',
+              name: "node:buffer",
+              message: "Use Uint8Array instead.",
             },
             {
-              name: 'node:path',
-              message: 'Use original path package instead.',
+              name: "node:path",
+              message: "Use original path package instead.",
             },
           ],
           patterns: [
             {
-              group: ['**/src', '!**/../src'],
-              message: 'Do not import internal modules directly.',
+              group: ["**/src", "!**/../src"],
+              message: "Do not import internal modules directly.",
             },
           ],
         },
@@ -50,11 +58,11 @@ export default defineConfig({
   fmt: {
     ...mizdraOxfmtConfig,
     ignorePatterns: [
-      'examples/*/generated',
-      'examples/*/src',
-      'docs/ts-plugin-internals.md',
-      'docs/ts-plugin-internals.ja.md',
-      'packages/vscode/vscode-test/fixtures',
+      "examples/*/generated",
+      "examples/*/src",
+      "docs/ts-plugin-internals.md",
+      "docs/ts-plugin-internals.ja.md",
+      "packages/vscode/vscode-test/fixtures",
     ],
   },
   test: {
@@ -74,22 +82,24 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          name: 'unit',
-          include: ['packages/*/src/**/*.test.ts'],
+          name: "unit",
+          include: ["packages/*/src/**/*.test.ts"],
         },
         resolve: {
           alias: {
-            '@css-modules-kit/core': resolve('packages/core/src/index.ts'),
-            ...(process.env['STYLELINT_VERSION'] ? { stylelint: `stylelint-${process.env['STYLELINT_VERSION']}` } : {}),
+            "@css-modules-kit/core": resolve("packages/core/src/index.ts"),
+            ...(process.env["STYLELINT_VERSION"]
+              ? { stylelint: `stylelint-${process.env["STYLELINT_VERSION"]}` }
+              : {}),
           },
         },
       },
       {
         extends: true,
         test: {
-          name: 'e2e',
-          include: ['packages/*/e2e-test/**/*.test.ts'],
-          globalSetup: ['./scripts/vitest-e2e-test-setup.ts'],
+          name: "e2e",
+          include: ["packages/*/e2e-test/**/*.test.ts"],
+          globalSetup: ["./scripts/vitest-e2e-test-setup.ts"],
         },
       },
     ],

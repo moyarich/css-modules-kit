@@ -1,5 +1,5 @@
-import { vi } from 'vite-plus/test';
-import type { Logger } from '../logger/logger.js';
+import { vi } from "vite-plus/test";
+import type { Logger } from "../logger/logger.js";
 
 export function createLoggerSpy() {
   return {
